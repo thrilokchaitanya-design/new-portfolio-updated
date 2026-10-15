@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>THRILOK CHAITANYA — SPATIAL WORKSPACE</title>
+
+  <!-- Typography: JetBrains Mono & Syne -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Core Libraries: Three.js and Lucide Icons -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* ==========================================================================
+       RESET & SYSTEM VARIABLES
+       ========================================================================== */
+    :root {
+      --bg-primary: #0a0b0e;
+      --bg-secondary: #111318;
+      --bg-window: rgba(14, 17, 23, 0.94);
+      --bg-window-header: #181c24;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(255, 255, 255, 0.28);
+      --border-highlight: #4f8cff;
+      --text-main: #e6edf3;
+      --text-muted: #8b949e;
+      --text-accent: #58a6ff;
+      --text-warning: #e3b341;
+      --accent-green: #3fb950;
+      --accent-danger: #f85149;
+      --grid-line: rgba(255, 255, 255, 0.035);
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-display: 'Syne', sans-serif;
+      --shadow-window: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--border-subtle);
+      --shadow-window-focused: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--border-highlight);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ==========================================================================
+       BACKGROUND GRID & 3D CANVAS
+       ========================================================================== */
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .bg-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-crosshair {
+      position: absolute;
+      width: 11px;
+      height: 11px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.25;
+    }
+    .bg-crosshair::before {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 0;
+      width: 11px;
+      height: 1px;
+      background-color: #fff;
+    }
+    .bg-crosshair::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 0;
+      width: 1px;
+      height: 11px;
+      background-color: #fff;
+    }
+
+    .bg-watermark {
+      position: absolute;
+      bottom: 60px;
+      left: 30px;
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 12vw, 11rem);
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.02);
+      line-height: 0.85;
+      letter-spacing: -0.05em;
+      pointer-events: none;
+      z-index: 0;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ==========================================================================
+       TOP STATUS BAR & DOCK
+       ========================================================================== */
+    .status-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 38px;
+      background: rgba(14, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 10000;
+      font-size: 11px;
+    }
+
+    .status-bar-left, .status-bar-right, .status-bar-center {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #fff;
+    }
+    .brand-mark svg {
+      color: var(--text-accent);
+    }
+
+    .telemetry-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      padding: 2px 8px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+    }
+    .telemetry-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    /* BOTTOM DOCK */
+    .dock-container {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(17, 19, 24, 0.88);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      z-index: 10000;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+    }
+
+    .dock-button {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+    }
+    .dock-button:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border-color: var(--border-subtle);
+    }
+    .dock-button.active {
+      background: rgba(88, 166, 255, 0.1);
+      color: var(--text-accent);
+      border-color: rgba(88, 166, 255, 0.35);
+    }
+
+    /* ==========================================================================
+       WINDOW MANAGER STYLES
+       ========================================================================== */
+    .workspace-window {
+      position: absolute;
+      background: var(--bg-window);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      box-shadow: var(--shadow-window);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 280px;
+      min-height: 180px;
+      transition: box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+
+    .workspace-window.focused {
+      box-shadow: var(--shadow-window-focused);
+      border-color: var(--border-active);
+    }
+
+    .workspace-window.minimized {
+      display: none !important;
+    }
+
+    .workspace-window.maximized {
+      top: 46px !important;
+      left: 10px !important;
+      width: calc(100% - 20px) !important;
+      height: calc(100% - 105px) !important;
+      border-radius: 4px;
+    }
+
+    .window-header {
+      height: 32px;
+      background: var(--bg-window-header);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      cursor: grab;
+      user-select: none;
+    }
+    .window-header:active {
+      cursor: grabbing;
+    }
+
+    .window-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .window-title i {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+    }
+
+    .window-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .control-btn {
+      width: 16px;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 10px;
+      line-height: 1;
+      transition: all 0.12s ease;
+    }
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+    .control-btn.close:hover {
+      background: var(--accent-danger);
+      border-color: var(--accent-danger);
+      color: #fff;
+    }
+
+    .window-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 16px;
+      user-select: text;
+    }
+    .window-body::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .window-body::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.1);
+    }
+    .window-body::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.12);
+      border-radius: 3px;
+    }
+
+    /* ==========================================================================
+       CONTENT PANELS SPECIFIC STYLING
+       ========================================================================== */
+    /* BIO WINDOW */
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+    .hero-role {
+      font-size: 11px;
+      color: var(--text-accent);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .section-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-top: 14px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .tag {
+      font-size: 10.5px;
+      padding: 3px 7px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: #c9d1d9;
+    }
+
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 11px;
+    }
+    .info-table td {
+      padding: 4px 0;
+      vertical-align: top;
+    }
+    .info-table td:first-child {
+      color: var(--text-muted);
+      width: 32%;
+    }
+    .info-table td:last-child {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    /* PROJECT SELECTOR WINDOW */
+    .project-item {
+      padding: 10px 12px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.015);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .project-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .project-item.active {
+      background: rgba(88, 166, 255, 0.08);
+      border-color: var(--text-accent);
+    }
+    .project-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .project-title {
+      font-weight: 700;
+      color: #fff;
+      font-size: 12px;
+    }
+    .project-badge {
+      font-size: 9px;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+    }
+    .badge-completed {
+      background: rgba(63, 185, 80, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(63, 185, 80, 0.3);
+    }
+    .badge-dev {
+      background: rgba(227, 179, 65, 0.15);
+      color: var(--text-warning);
+      border: 1px solid rgba(227, 179, 65, 0.3);
+    }
+    .project-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* MEDIA & INSPECTOR WINDOW */
+    .inspector-banner {
+      width: 100%;
+      height: 130px;
+      background: #0d1117;
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .inspector-blueprint {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.15;
+      background: radial-gradient(circle, var(--text-accent) 10%, transparent 11%);
+      background-size: 12px 12px;
+    }
+    .inspector-title {
+      position: relative;
+      z-index: 2;
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 800;
+      text-align: center;
+      padding: 0 10px;
+    }
+
+    .tech-list-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .tech-pill {
+      font-size: 10.5px;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tech-pill::before {
+      content: '›';
+      color: var(--text-accent);
+      font-weight: bold;
+    }
+
+    /* CONSOLE LOG WINDOW */
+    .console-body {
+      background: #07080a;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #9ece6a;
+      padding: 12px;
+      height: 100%;
+      overflow-y: auto;
+    }
+    .console-line {
+      margin-bottom: 4px;
+      line-height: 1.4;
+      display: flex;
+      gap: 8px;
+    }
+    .console-prefix {
+      color: #565f89;
+      user-select: none;
+    }
+    .console-highlight {
+      color: #7aa2f7;
+    }
+    .console-warn {
+      color: var(--text-warning);
+    }
+    .console-err {
+      color: var(--accent-danger);
+    }
+
+    /* ==========================================================================
+       RESPONSIVE ADAPTATIONS
+       ========================================================================== */
+    @media (max-width: 900px) {
+      .workspace-window {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: 480px;
+        margin-bottom: 12px;
+      }
+      #desktop-canvas {
+        display: block;
+      }
+      .mobile-scroll-container {
+        position: absolute;
+        top: 38px;
+        left: 0;
+        width: 100%;
+        height: calc(100% - 38px);
+        overflow-y: auto;
+        padding: 12px;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+      }
+      .dock-container {
+        display: none;
+      }
+    }
+    @media (min-width: 901px) {
+      .mobile-scroll-container {
+        display: contents;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BACKGROUND GRAPHICS & THREE.JS CANVAS -->
+  <div class="bg-grid"></div>
+  <div class="bg-crosshair" style="top: 80px; left: 80px;"></div>
+  <div class="bg-crosshair" style="top: 80px; right: 80px;"></div>
+  <div class="bg-crosshair" style="bottom: 80px; left: 80px;"></div>
+  <div class="bg-crosshair" style="bottom: 80px; right: 80px;"></div>
+  <div class="bg-watermark">CHAITANYA</div>
+
+  <div id="canvas-container"></div>
+
+  <!-- STATUS HEADER BAR -->
+  <header class="status-bar">
+    <div class="status-bar-left">
+      <div class="brand-mark">
+        <i data-lucide="terminal" style="width: 15px; height: 15px;"></i>
+        <span>TC//SYS_WORKSPACE</span>
+      </div>
+      <div class="telemetry-badge">
+        <span class="telemetry-dot"></span>
+        <span id="system-status">SYS_ONLINE : VIT-AP NODE</span>
+      </div>
+    </div>
+    <div class="status-bar-center">
+      <div class="telemetry-badge" style="border: none; background: transparent;">
+        OPERATOR: <strong>THRILOK CHAITANYA</strong>
+      </div>
+    </div>
+    <div class="status-bar-right">
+      <div class="telemetry-badge">
+        <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
+        <span id="utc-clock">00:00:00 UTC</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- WORKSPACE DESKTOP / WINDOW WRAPPER -->
+  <main class="mobile-scroll-container" id="workspace-area">
+
+    <!-- WINDOW 1: OPERATOR BIO / IDENTITY -->
+    <div class="workspace-window focused" id="win-about" style="top: 60px; left: 35px; width: 440px; height: 490px; z-index: 20;">
+      <div class="window-header">
+        <div class="window-title">
+          <i data-lucide="user"></i>
+          <span>OPERATOR_DOSSIER.IDX</span>
+        </div>
+        <div class="window-controls">
+          <button class="control-btn" onclick="minimizeWindow('win-about')" title="Minimize">_</button>
+          <button class="control-btn" onclick="toggleMaximize('win-about')" title="Maximize">□</button>
+          <button class="control-btn close" onclick="closeWindow('win-about')" title="Close">×</button>
+        </div>
+      </div>
+      <div class="window-body">
+        <div class="hero-title">THRILOK CHAITANYA</div>
+        <div class="hero-role">Computer Science & Engineering // Systems & AI</div>
+        
+        <table class="info-table">
+          <tr>
+            <td>IDENTITY:</td>
+            <td>Thrilok Chaitanya</td>
+          </tr>
+          <tr>
+            <td>EDUCATION:</td>
+            <td>B.Tech, Computer Science and Engineering</td>
+          </tr>
+          <tr>
+            <td>INSTITUTION:</td>
+            <td>VIT-AP University</td>
+          </tr>
+          <tr>
+            <td>CERTIFICATION:</td>
+            <td>Oracle Certified Foundations Associate — Java</td>
+          </tr>
+          <tr>
+            <td>VALIDITY:</td>
+            <td>August 2026</td>
+          </tr>
+          <tr>
+            <td>CONTACT / MAIL:</td>
+            <td style="color: var(--text-muted);">WILL BE UPDATED</td>
+          </tr>
+          <tr>
+            <td>GITHUB / REPO:</td>
+            <td style="color: var(--text-muted);">WILL BE UPDATED</td>
+          </tr>
+          <tr>
+            <td>LINKEDIN / NET:</td>
+            <td style="color: var(--text-muted);">WILL BE UPDATED</td>
+          </tr>
+          <tr>
+            <td>RESUME DOSSIER:</td>
+            <td style="color: var(--text-muted);">WILL BE UPDATED</td>
+          </tr>
+        </table>
+
+        <div class="section-label">CORE DOMAINS & INTERESTS</div>
+        <div class="tag-cloud">
+          <span class="tag">Software Engineering</span>
+          <span class="tag">Full-Stack Development</span>
+          <span class="tag">AI and Machine Learning</span>
+          <span class="tag">Cybersecurity</span>
+          <span class="tag">Real-Time Systems</span>
+          <span class="tag">Cloud & DevOps</span>
+          <span class="tag">Interactive Web Experiences</span>
+        </div>
+
+        <div class="section-label">OPERATING RECORD</div>
+        <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5;">
+          Focused on architecting scalable full-stack software, reactive distributed monitoring services, and machine learning pipelines.
+        </p>
+      </div>
+    </div>
+
+    <!-- WINDOW 2: PROJECT NAVIGATOR -->
+    <div class="workspace-window" id="win-projects" style="top: 75px; left: 500px; width: 440px; height: 500px; z-index: 21;">
+      <div class="window-header">
+        <div class="window-title">
+          <i data-lucide="layers"></i>
+          <span>PROJECT_DIRECTORY.DIR</span>
+        </div>
+        <div class="window-controls">
+          <button class="control-btn" onclick="minimizeWindow('win-projects')">_</button>
+          <button class="control-btn" onclick="toggleMaximize('win-projects')">□</button>
+          <button class="control-btn close" onclick="closeWindow('win-projects')">×</button>
+        </div>
+      </div>
+      <div class="window-body" id="project-list-container">
+        <!-- Project 1 -->
+        <div class="project-item active" onclick="selectProject(0)">
+          <div class="project-header-row">
+            <span class="project-title">01 // Network Security Monitoring System</span>
+            <span class="project-badge badge-completed">OPERATIONAL</span>
+          </div>
+          <p class="project-desc">
+            Distributed cyber defense telemetry platform with real-time alert dispatch, topology inspection, and timeline replay.
+          </p>
+        </div>
+
+        <!-- Project 2 -->
+        <div class="project-item" onclick="selectProject(1)">
+          <div class="project-header-row">
+            <span class="project-title">02 // Multimodal Sentiment Analyzer</span>
+            <span class="project-badge badge-completed">OPERATIONAL</span>
+          </div>
+          <p class="project-desc">
+            Dual-branch neural pipeline marrying ResNet18 visual embeddings and Transformer/LSTM textual tokens on MVSA-Multiple data.
+          </p>
+        </div>
+
+        <!-- Project 3 -->
+        <div class="project-item" onclick="selectProject(2)">
+          <div class="project-header-row">
+            <span class="project-title">03 // PDF Outline Extractor</span>
+            <span class="project-badge badge-completed">HACKATHON</span>
+          </div>
+          <p class="project-desc">
+            Adobe India Hackathon solution engineered for autonomous offline, CPU-only outline induction within a strict &lt;200MB footprint.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- WINDOW 3: PROJECT DETAIL & SPECIFICATION INSPECTOR -->
+    <div class="workspace-window" id="win-inspector" style="top: 130px; left: 965px; width: 450px; height: 550px; z-index: 22;">
+      <div class="window-header">
+        <div class="window-title">
+          <i data-lucide="cpu"></i>
+          <span id="inspector-header-tag">SYS_INSPECTOR // PROJECT_01</span>
+        </div>
+        <div class="window-controls">
+          <button class="control-btn" onclick="minimizeWindow('win-inspector')">_</button>
+          <button class="control-btn" onclick="toggleMaximize('win-inspector')">□</button>
+          <button class="control-btn close" onclick="closeWindow('win-inspector')">×</button>
+        </div>
+      </div>
+      <div class="window-body" id="inspector-content">
+        <!-- Dynamic Content injected via JS -->
+      </div>
+    </div>
+
+    <!-- WINDOW 4: LIVE WORKSPACE TERMINAL / TELEMETRY -->
+    <div class="workspace-window" id="win-console" style="top: 575px; left: 35px; width: 905px; height: 210px; z-index: 19;">
+      <div class="window-header">
+        <div class="window-title">
+          <i data-lucide="terminal"></i>
+          <span>STDOUT_STREAM // WORKSPACE_KERNEL</span>
+        </div>
+        <div class="window-controls">
+          <button class="control-btn" onclick="minimizeWindow('win-console')">_</button>
+          <button class="control-btn" onclick="toggleMaximize('win-console')">□</button>
+          <button class="control-btn close" onclick="closeWindow('win-console')">×</button>
+        </div>
+      </div>
+      <div class="console-body" id="console-stream">
+        <div class="console-line"><span class="console-prefix">[KERNEL]</span> Initializing Spatial Desktop Subsystems... OK</div>
+        <div class="console-line"><span class="console-prefix">[AUTH]</span> Authenticated user: <span class="console-highlight">THRILOK CHAITANYA</span> (VIT-AP University node)</div>
+        <div class="console-line"><span class="console-prefix">[CERT]</span> Verified: Oracle Certified Foundations Associate — Java (Valid: August 2026)</div>
+        <div class="console-line"><span class="console-prefix">[LOAD]</span> Loaded 3 verified primary architectural units. Ready for telemetry stream.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- SYSTEM DOCK -->
+  <nav class="dock-container">
+    <button class="dock-button active" id="dock-win-about" onclick="toggleWindowFromDock('win-about')">
+      <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+      <span>BIO</span>
+    </button>
+    <button class="dock-button active" id="dock-win-projects" onclick="toggleWindowFromDock('win-projects')">
+      <i data-lucide="layers" style="width: 14px; height: 14px;"></i>
+      <span>DIRECTORY</span>
+    </button>
+    <button class="dock-button active" id="dock-win-inspector" onclick="toggleWindowFromDock('win-inspector')">
+      <i data-lucide="cpu" style="width: 14px; height: 14px;"></i>
+      <span>INSPECTOR</span>
+    </button>
+    <button class="dock-button active" id="dock-win-console" onclick="toggleWindowFromDock('win-console')">
+      <i data-lucide="terminal" style="width: 14px; height: 14px;"></i>
+      <span>KERNEL</span>
+    </button>
+    <div style="width: 1px; height: 16px; background: var(--border-subtle); margin: 0 4px;"></div>
+    <button class="dock-button" onclick="resetWorkspaceLayout()">
+      <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+      <span>RESET</span>
+    </button>
+  </nav>
+
+  <!-- ==========================================================================
+       SYSTEM APPLICATION SCRIPTING
+       ========================================================================== -->
+  <script>
+    /* ==========================================================================
+       DATA SOURCE DEFINITION (STRICT SOURCE OF TRUTH)
+       ========================================================================== */
+    const PROJECTS_DATA = [
+      {
+        id: "proj-1",
+        title: "Network Security Monitoring System",
+        tagline: "High-Throughput Cyber Defense & Telemetry Platform",
+        status: "OPERATIONAL",
+        client: "WILL BE UPDATED",
+        year: "WILL BE UPDATED",
+        metrics: "WILL BE UPDATED",
+        implemented: [
+          "FastAPI high-concurrency asynchronous backend",
+          "React & Vite reactive control dashboard",
+          "PostgreSQL persistent datastore via SQLAlchemy & Alembic",
+          "JWT-secured authentication with Strict RBAC (Viewer, Analyst, Admin)",
+          "Dynamic Alert lifecycle management & remediation actions",
+          "Host state monitoring, analytics & network topology rendering",
+          "Bidirectional WebSocket alert dispatch & instant notification",
+          "Stateful alert timeline with deterministic replay controls"
+        ],
+        inDevelopment: [
+          "GraphSAGE-based graph representation intrusion detection",
+          "Supplemental AI-based anomaly detectors",
+          "Ryu SDN Controller programmatic network integration",
+          "OpenFlow automated flow-rule mitigation & traffic isolation"
+        ],
+        technologies: [
+          "FastAPI", "React", "Vite", "PostgreSQL",
+          "SQLAlchemy", "Alembic", "WebSockets", "JWT",
+          "GraphSAGE", "OpenFlow", "Ryu SDN"
+        ]
+      },
+      {
+        id: "proj-2",
+        title: "Multimodal Sentiment Analyzer",
+        tagline: "Dual-Stream Vision & Natural Language Sentiment Synthesis",
+        status: "OPERATIONAL",
+        client: "WILL BE UPDATED",
+        year: "WILL BE UPDATED",
+        metrics: "WILL BE UPDATED",
+        implemented: [
+          "Curated evaluation on MVSA-Multiple multimodal dataset",
+          "Deep visual feature extraction via ResNet18 convolutional backbone",
+          "Sequence-based contextual text representation via Transformer / LSTM encoders",
+          "Joint multimodal representation fusion for consolidated polarity inference"
+        ],
+        inDevelopment: [
+          "Cross-modal attention matrix optimization",
+          "Edge-quantized deployment pipeline"
+        ],
+        technologies: [
+          "ResNet18", "Transformers", "LSTM", "PyTorch",
+          "Multimodal Fusion", "Python", "Computer Vision", "NLP"
+        ]
+      },
+      {
+        id: "proj-3",
+        title: "Adobe India Hackathon — PDF Outline Extractor",
+        tagline: "Autonomous Offline Structural Induction Engine",
+        status: "HACKATHON",
+        client: "WILL BE UPDATED",
+        year: "WILL BE UPDATED",
+        metrics: "WILL BE UPDATED",
+        implemented: [
+          "Engineered for strictly disconnected offline execution",
+          "CPU-exclusive compute runtime with no GPU dependencies",
+          "Model-driven hierarchical heading & structure categorization",
+          "Ultra-compact architecture fitting within strict < 200 MB parameter constraint",
+          "Fully containerized Dockerized reproducibility pipeline"
+        ],
+        inDevelopment: [
+          "Multi-language font script detection heuristic expansion"
+        ],
+        technologies: [
+          "Python", "Docker", "Document Analysis",
+          "CPU-Optimized Inference", "Model Compression (<200MB)"
+        ]
+      }
+    ];
+
+    let currentProjectIndex = 0;
+
+    /* ==========================================================================
+       THREE.JS INTERACTIVE 3D BACKGROUND CORE
+       ========================================================================== */
+    let scene, camera, renderer, cyberCore, wireframeMesh, pointLight;
+    let mouseX = 0, mouseY = 0;
+    let targetX = 0, targetY = 0;
+    const windowHalfX = window.innerWidth / 2;
+    const windowHalfY = window.innerHeight / 2;
+
+    function initThreeEngine() {
+      const container = document.getElementById('canvas-container');
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 28;
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      // Cybernetic Gyroscope/Icosahedron Core
+      const coreGeometry = new THREE.IcosahedronGeometry(7, 2);
+      const coreMaterial = new THREE.MeshPhongMaterial({
+        color: 0x111622,
+        emissive: 0x050a14,
+        specular: 0x58a6ff,
+        shininess: 40,
+        flatShading: true,
+        transparent: true,
+        opacity: 0.65
+      });
+      cyberCore = new THREE.Mesh(coreGeometry, coreMaterial);
+      scene.add(cyberCore);
+
+      const wireGeometry = new THREE.IcosahedronGeometry(7.08, 2);
+      const wireMaterial = new THREE.MeshBasicMaterial({
+        color: 0x4f8cff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.22
+      });
+      wireframeMesh = new THREE.Mesh(wireGeometry, wireMaterial);
+      cyberCore.add(wireframeMesh);
+
+      // External Orbital Ring
+      const ringGeom = new THREE.TorusGeometry(10.5, 0.04, 16, 100);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x58a6ff, transparent: true, opacity: 0.18 });
+      const ringMesh = new THREE.Mesh(ringGeom, ringMat);
+      ringMesh.rotation.x = Math.PI / 2.3;
+      scene.add(ringMesh);
+
+      // Lighting configuration
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0x58a6ff, 1.2);
+      dirLight.position.set(20, 40, 20);
+      scene.add(dirLight);
+
+      pointLight = new THREE.PointLight(0x3fb950, 1.5, 50);
+      pointLight.position.set(-10, -10, 15);
+      scene.add(pointLight);
+
+      document.addEventListener('mousemove', onDocumentMouseMove, false);
+      window.addEventListener('resize', onWindowResize, false);
+
+      animateThree();
+    }
+
+    function onDocumentMouseMove(event) {
+      mouseX = (event.clientX - windowHalfX) * 0.0006;
+      mouseY = (event.clientY - windowHalfY) * 0.0006;
+    }
+
+    function onWindowResize() {
+      if (!camera || !renderer) return;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animateThree() {
+      requestAnimationFrame(animateThree);
+
+      targetX += (mouseX - targetX) * 0.05;
+      targetY += (mouseY - targetY) * 0.05;
+
+      if (cyberCore) {
+        cyberCore.rotation.y += 0.004;
+        cyberCore.rotation.x += 0.002;
+        cyberCore.rotation.y += targetX * 0.4;
+        cyberCore.rotation.x += targetY * 0.4;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    /* ==========================================================================
+       WINDOW MANAGER ENGINE (DRAG, Z-INDEX, MIN/MAX, FOCUS)
+       ========================================================================== */
+    let highestZ = 30;
+    const windows = ['win-about', 'win-projects', 'win-inspector', 'win-console'];
+    const initialPos = {
+      'win-about': { top: '60px', left: '35px', width: '440px', height: '490px' },
+      'win-projects': { top: '75px', left: '500px', width: '440px', height: '500px' },
+      'win-inspector': { top: '130px', left: '965px', width: '450px', height: '550px' },
+      'win-console': { top: '575px', left: '35px', width: '905px', height: '210px' }
+    };
+
+    function bringToFront(winEl) {
+      highestZ++;
+      winEl.style.zIndex = highestZ;
+      windows.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('focused');
+      });
+      winEl.classList.add('focused');
+    }
+
+    function setupDraggableWindows() {
+      if (window.innerWidth <= 900) return; // Native flow on mobile viewports
+
+      windows.forEach(winId => {
+        const winEl = document.getElementById(winId);
+        if (!winEl) return;
+
+        const header = winEl.querySelector('.window-header');
+
+        winEl.addEventListener('mousedown', () => bringToFront(winEl));
+
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        header.addEventListener('mousedown', (e) => {
+          if (e.target.closest('.control-btn')) return;
+          if (winEl.classList.contains('maximized')) return;
+
+          isDragging = true;
+          bringToFront(winEl);
+
+          startX = e.clientX;
+          startY = e.clientY;
+          initialLeft = winEl.offsetLeft;
+          initialTop = winEl.offsetTop;
+
+          function onMouseMove(ev) {
+            if (!isDragging) return;
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            winEl.style.left = `${initialLeft + dx}px`;
+            winEl.style.top = `${initialTop + dy}px`;
+          }
+
+          function onMouseUp() {
+            isDragging = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+          }
+
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        });
+      });
+    }
+
+    function closeWindow(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+      const dockBtn = document.getElementById(`dock-${id}`);
+      if (dockBtn) dockBtn.classList.remove('active');
+      logToConsole(`Window closed: [${id.toUpperCase()}]`);
+    }
+
+    function minimizeWindow(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('minimized');
+      const dockBtn = document.getElementById(`dock-${id}`);
+      if (dockBtn) dockBtn.classList.remove('active');
+      logToConsole(`Window suspended: [${id.toUpperCase()}]`);
+    }
+
+    function toggleMaximize(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle('maximized');
+      bringToFront(el);
+      logToConsole(`Window bounds toggled: [${id.toUpperCase()}]`);
+    }
+
+    function toggleWindowFromDock(id) {
+      const el = document.getElementById(id);
+      const dockBtn = document.getElementById(`dock-${id}`);
+      if (!el) return;
+
+      if (el.style.display === 'none' || el.classList.contains('minimized')) {
+        el.style.display = 'flex';
+        el.classList.remove('minimized');
+        bringToFront(el);
+        if (dockBtn) dockBtn.classList.add('active');
+        logToConsole(`Restored window: [${id.toUpperCase()}]`);
+      } else {
+        minimizeWindow(id);
+      }
+    }
+
+    function resetWorkspaceLayout() {
+      windows.forEach(id => {
+        const el = document.getElementById(id);
+        const dockBtn = document.getElementById(`dock-${id}`);
+        if (el) {
+          el.style.display = 'flex';
+          el.classList.remove('minimized', 'maximized');
+          const p = initialPos[id];
+          if (p && window.innerWidth > 900) {
+            el.style.top = p.top;
+            el.style.left = p.left;
+            el.style.width = p.width;
+            el.style.height = p.height;
+          }
+          if (dockBtn) dockBtn.classList.add('active');
+        }
+      });
+      logToConsole(`Spatial matrix reset to default coordinates.`);
+    }
+
+    /* ==========================================================================
+       PROJECT SELECTOR & INSPECTOR RENDERING
+       ========================================================================== */
+    function renderInspector(index) {
+      const project = PROJECTS_DATA[index];
+      const container = document.getElementById('inspector-content');
+      const headerTag = document.getElementById('inspector-header-tag');
+
+      headerTag.textContent = `SYS_INSPECTOR // ${project.id.toUpperCase()}`;
+
+      let implementedHtml = project.implemented.map(item => `
+        <li style="margin-bottom: 5px; color: var(--text-main); font-size: 11px;">
+          <span style="color: var(--accent-green); margin-right: 4px;">✔</span> ${item}
+        </li>
+      `).join('');
+
+      let inDevHtml = project.inDevelopment.map(item => `
+        <li style="margin-bottom: 5px; color: var(--text-muted); font-size: 11px;">
+          <span style="color: var(--text-warning); margin-right: 4px;">⚡</span> ${item}
+        </li>
+      `).join('');
+
+      let techPills = project.technologies.map(t => `
+        <div class="tech-pill">${t}</div>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="inspector-banner">
+          <div class="inspector-blueprint"></div>
+          <div class="inspector-title">${project.title}</div>
+        </div>
+
+        <div style="font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 4px;">${project.tagline}</div>
+        
+        <table class="info-table" style="margin-bottom: 12px;">
+          <tr>
+            <td>OPERATING STATUS:</td>
+            <td><span class="project-badge ${project.status === 'OPERATIONAL' ? 'badge-completed' : 'badge-dev'}">${project.status}</span></td>
+          </tr>
+          <tr>
+            <td>CLIENT / PARTNER:</td>
+            <td style="color: var(--text-muted);">${project.client}</td>
+          </tr>
+          <tr>
+            <td>CHRONO TIMELINE:</td>
+            <td style="color: var(--text-muted);">${project.year}</td>
+          </tr>
+          <tr>
+            <td>PERF EVALUATION:</td>
+            <td style="color: var(--text-muted);">${project.metrics}</td>
+          </tr>
+        </table>
+
+        <div class="section-label">IMPLEMENTED ARCHITECTURE</div>
+        <ul style="list-style: none; padding-left: 0; margin-top: 6px;">
+          ${implementedHtml}
+        </ul>
+
+        <div class="section-label" style="margin-top: 12px;">IN DEVELOPMENT / PLANNED</div>
+        <ul style="list-style: none; padding-left: 0; margin-top: 6px;">
+          ${inDevHtml}
+        </ul>
+
+        <div class="section-label" style="margin-top: 12px;">STACK SPECIFICATION</div>
+        <div class="tech-list-grid">
+          ${techPills}
+        </div>
+      `;
+    }
+
+    function selectProject(index) {
+      currentProjectIndex = index;
+      const items = document.querySelectorAll('.project-item');
+      items.forEach((item, idx) => {
+        item.classList.toggle('active', idx === index);
+      });
+
+      renderInspector(index);
+      logToConsole(`Loaded Project Telemetry: [${PROJECTS_DATA[index].title}]`);
+
+      // Color flare on 3D point light to acknowledge project state change
+      if (pointLight) {
+        pointLight.color.setHex(index === 0 ? 0x58a6ff : (index === 1 ? 0x3fb950 : 0xe3b341));
+      }
+    }
+
+    /* ==========================================================================
+       REAL-TIME TELEMETRY STREAM & LOGGING
+       ========================================================================== */
+    function logToConsole(message) {
+      const consoleStream = document.getElementById('console-stream');
+      if (!consoleStream) return;
+      const now = new Date().toTimeString().split(' ')[0];
+      const line = document.createElement('div');
+      line.className = 'console-line';
+      line.innerHTML = `<span class="console-prefix">[${now}]</span> ${message}`;
+      consoleStream.appendChild(line);
+      consoleStream.scrollTop = consoleStream.scrollHeight;
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const utcString = now.toUTCString().split(' ')[4] + ' UTC';
+      const el = document.getElementById('utc-clock');
+      if (el) el.textContent = utcString;
+    }
+
+    /* ==========================================================================
+       BOOTSTRAP INITIALIZATION
+       ========================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Initialize Icons
+      lucide.createIcons();
+
+      // 2. Initialize 3D Engine
+      initThreeEngine();
+
+      // 3. Setup Spatial Window Manager
+      setupDraggableWindows();
+
+      // 4. Mount Default Inspector View
+      renderInspector(0);
+
+      // 5. Start Clocks & Heartbeat
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      logToConsole("All spatial workstations mounted and active.");
+    });
+  </script>
+</body>
+</html>
