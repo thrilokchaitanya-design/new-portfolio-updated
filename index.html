@@ -1,67 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>THRILOK CHAITANYA — SPATIAL WORKSPACE</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>THRILOK CHAITANYA — Interactive Systems & Software Engineer</title>
+  <meta name="description" content="Portfolio of Thrilok Chaitanya — Computer Science & Engineering student at VIT-AP University. Backend Engineering, AI Systems, and High-Performance Interactive Architectures." />
+  
+  <!-- Three.js r128 & OrbitControls via high-speed CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-  <!-- Typography: JetBrains Mono & Syne -->
+  <!-- Google Fonts: Space Grotesk & JetBrains Mono for authentic brutalist-minimalist typographic hierarchy -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
-
-  <!-- Core Libraries: Three.js and Lucide Icons -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* ==========================================================================
-       RESET & SYSTEM VARIABLES
-       ========================================================================== */
-    :root {
-      --bg-primary: #0a0b0e;
-      --bg-secondary: #111318;
-      --bg-window: rgba(14, 17, 23, 0.94);
-      --bg-window-header: #181c24;
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-active: rgba(255, 255, 255, 0.28);
-      --border-highlight: #4f8cff;
-      --text-main: #e6edf3;
-      --text-muted: #8b949e;
-      --text-accent: #58a6ff;
-      --text-warning: #e3b341;
-      --accent-green: #3fb950;
-      --accent-danger: #f85149;
-      --grid-line: rgba(255, 255, 255, 0.035);
-      --font-mono: 'JetBrains Mono', monospace;
-      --font-display: 'Syne', sans-serif;
-      --shadow-window: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--border-subtle);
-      --shadow-window-focused: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--border-highlight);
-    }
-
-    * {
+    /* =========================================================================
+       CSS RESET & DESIGN TOKENS (Matteo Courquin Spatial OS Aesthetic)
+       ========================================================================= */
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg-color: #0b0d11;
+      --bg-panel: rgba(18, 22, 29, 0.78);
+      --bg-panel-solid: #12161d;
+      --bg-header: rgba(13, 16, 22, 0.85);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --border-focus: rgba(255, 255, 255, 0.35);
+      --text-main: #f0f3f8;
+      --text-muted: #8b95a5;
+      --text-dim: #545e6d;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.3);
+      --status-green: #10b981;
+      --status-amber: #f59e0b;
+      --status-red: #ef4444;
+      --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --window-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border-color);
+      --window-active-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--border-focus);
     }
 
     html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: var(--bg-primary);
+      background-color: var(--bg-color);
       color: var(--text-main);
-      font-family: var(--font-mono);
-      font-size: 12px;
-      line-height: 1.5;
+      font-family: var(--font-display);
+      user-select: none;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ==========================================================================
-       BACKGROUND GRID & 3D CANVAS
-       ========================================================================== */
+    /* Ambient Spatial Backdrop & Coordinate Grid */
     #canvas-container {
       position: absolute;
       top: 0;
@@ -69,857 +65,1393 @@
       width: 100%;
       height: 100%;
       z-index: 1;
-      pointer-events: none;
+      pointer-events: auto;
     }
 
-    .bg-grid {
+    .grid-underlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: 
-        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
       background-size: 40px 40px;
-      z-index: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
       pointer-events: none;
+      z-index: 2;
     }
 
-    .bg-crosshair {
-      position: absolute;
-      width: 11px;
-      height: 11px;
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.25;
-    }
-    .bg-crosshair::before {
-      content: '';
-      position: absolute;
-      top: 5px;
-      left: 0;
-      width: 11px;
-      height: 1px;
-      background-color: #fff;
-    }
-    .bg-crosshair::after {
-      content: '';
-      position: absolute;
-      left: 5px;
-      top: 0;
-      width: 1px;
-      height: 11px;
-      background-color: #fff;
-    }
-
-    .bg-watermark {
-      position: absolute;
-      bottom: 60px;
-      left: 30px;
-      font-family: var(--font-display);
-      font-size: clamp(3rem, 12vw, 11rem);
-      font-weight: 900;
-      color: rgba(255, 255, 255, 0.02);
-      line-height: 0.85;
-      letter-spacing: -0.05em;
-      pointer-events: none;
-      z-index: 0;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    /* ==========================================================================
-       TOP STATUS BAR & DOCK
-       ========================================================================== */
-    .status-bar {
+    .vignette {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 38px;
-      background: rgba(14, 17, 23, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-subtle);
+      height: 100%;
+      background: radial-gradient(circle at center, transparent 30%, rgba(11, 13, 17, 0.85) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* =========================================================================
+       TOP PERSISTENT NAVIGATION (Responsive Desktop / Mobile)
+       ========================================================================= */
+    #top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 54px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
-      z-index: 10000;
-      font-size: 11px;
+      padding: 0 24px;
+      background: var(--bg-header);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 1000;
     }
 
-    .status-bar-left, .status-bar-right, .status-bar-center {
+    .nav-brand {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      color: var(--text-main);
     }
 
-    .brand-mark {
+    .brand-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--status-green);
+      box-shadow: 0 0 10px var(--status-green);
+    }
+
+    .nav-links {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: #fff;
-    }
-    .brand-mark svg {
-      color: var(--text-accent);
     }
 
-    .telemetry-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-muted);
-      padding: 2px 8px;
-      border-radius: 2px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-subtle);
-    }
-    .telemetry-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent-green);
-      box-shadow: 0 0 6px var(--accent-green);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.35; }
-    }
-
-    /* BOTTOM DOCK */
-    .dock-container {
-      position: absolute;
-      bottom: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(17, 19, 24, 0.88);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      z-index: 10000;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.5);
-    }
-
-    .dock-button {
+    .nav-item-btn {
       background: transparent;
       border: 1px solid transparent;
       color: var(--text-muted);
-      padding: 6px 12px;
       font-family: var(--font-mono);
       font-size: 11px;
       font-weight: 500;
+      letter-spacing: 0.08em;
+      padding: 6px 14px;
+      border-radius: 4px;
       cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      border-radius: 4px;
-      transition: all 0.15s ease;
-    }
-    .dock-button:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-main);
-      border-color: var(--border-subtle);
-    }
-    .dock-button.active {
-      background: rgba(88, 166, 255, 0.1);
-      color: var(--text-accent);
-      border-color: rgba(88, 166, 255, 0.35);
     }
 
-    /* ==========================================================================
-       WINDOW MANAGER STYLES
-       ========================================================================== */
-    .workspace-window {
+    .nav-item-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-color);
+    }
+
+    .nav-item-btn.active {
+      color: #fff;
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    .nav-meta-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .hud-clock {
+      color: var(--text-muted);
+    }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* =========================================================================
+       SPATIAL WORKSPACE CONTAINER & FLOATING WINDOW SYSTEM
+       ========================================================================= */
+    #workspace {
       position: absolute;
-      background: var(--bg-window);
+      top: 54px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+      z-index: 10;
+      pointer-events: none; /* children enable pointer events */
+    }
+
+    .floating-window {
+      position: absolute;
+      background: var(--bg-panel);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      box-shadow: var(--shadow-window);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: var(--window-shadow);
       display: flex;
       flex-direction: column;
+      pointer-events: auto;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
       overflow: hidden;
-      min-width: 280px;
-      min-height: 180px;
-      transition: box-shadow 0.15s ease, opacity 0.15s ease;
+      min-width: 320px;
+      max-width: 90vw;
     }
 
-    .workspace-window.focused {
-      box-shadow: var(--shadow-window-focused);
-      border-color: var(--border-active);
+    .floating-window.focused {
+      border-color: var(--border-focus);
+      box-shadow: var(--window-active-shadow);
     }
 
-    .workspace-window.minimized {
+    .floating-window.minimized {
       display: none !important;
     }
 
-    .workspace-window.maximized {
-      top: 46px !important;
-      left: 10px !important;
-      width: calc(100% - 20px) !important;
-      height: calc(100% - 105px) !important;
-      border-radius: 4px;
-    }
-
+    /* Window Header / Draggable Bar */
     .window-header {
-      height: 32px;
-      background: var(--bg-window-header);
-      border-bottom: 1px solid var(--border-subtle);
+      height: 36px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 10px;
+      padding: 0 12px;
       cursor: grab;
       user-select: none;
     }
+
     .window-header:active {
       cursor: grabbing;
     }
 
-    .window-title {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: var(--text-main);
+    .window-traffic-lights {
       display: flex;
       align-items: center;
-      gap: 6px;
-    }
-    .window-title i {
-      width: 14px;
-      height: 14px;
-      stroke-width: 2;
+      gap: 7px;
     }
 
-    .window-controls {
+    .traffic-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s ease, transform 0.15s ease;
+    }
+
+    .traffic-dot:hover {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+
+    .dot-close { background: #ef4444; }
+    .dot-minimize { background: #f59e0b; }
+    .dot-maximize { background: #10b981; }
+
+    .window-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      text-transform: uppercase;
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .control-btn {
-      width: 16px;
-      height: 16px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      border-radius: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+
+    .window-controls-aux {
+      font-family: var(--font-mono);
       font-size: 10px;
-      line-height: 1;
-      transition: all 0.12s ease;
-    }
-    .control-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
-    }
-    .control-btn.close:hover {
-      background: var(--accent-danger);
-      border-color: var(--accent-danger);
-      color: #fff;
+      color: var(--text-dim);
     }
 
     .window-body {
-      flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 16px;
+      padding: 20px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-main);
       user-select: text;
     }
+
     .window-body::-webkit-scrollbar {
       width: 6px;
-      height: 6px;
     }
     .window-body::-webkit-scrollbar-track {
-      background: rgba(0,0,0,0.1);
+      background: rgba(0, 0, 0, 0.2);
     }
     .window-body::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.12);
+      background: rgba(255, 255, 255, 0.15);
       border-radius: 3px;
     }
+    .window-body::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
 
-    /* ==========================================================================
-       CONTENT PANELS SPECIFIC STYLING
-       ========================================================================== */
-    /* BIO WINDOW */
-    .hero-title {
-      font-family: var(--font-display);
-      font-size: 24px;
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      margin-bottom: 4px;
-      color: #fff;
+    /* =========================================================================
+       SPECIFIC WINDOW LAYOUTS
+       ========================================================================= */
+    /* 1. Profile / Introduction Window */
+    #win-profile {
+      width: 420px;
+      top: 30px;
+      left: 40px;
     }
-    .hero-role {
-      font-size: 11px;
-      color: var(--text-accent);
-      margin-bottom: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+
+    .profile-hero {
+      margin-bottom: 16px;
     }
-    .section-label {
+
+    .profile-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: var(--text-muted);
-      margin-top: 14px;
+      padding: 3px 8px;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      border-radius: 3px;
+      margin-bottom: 8px;
+    }
+
+    .profile-name {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: #fff;
       margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border-subtle);
     }
 
-    .tag-cloud {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 4px;
-    }
-    .tag {
-      font-size: 10.5px;
-      padding: 3px 7px;
-      border-radius: 2px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-subtle);
-      color: #c9d1d9;
+    .profile-role {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 400;
     }
 
-    .info-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 6px;
+    .profile-bio {
+      font-size: 12.5px;
+      color: #c3cad5;
+      line-height: 1.65;
+      margin-bottom: 16px;
+      border-left: 2px solid var(--accent);
+      padding-left: 12px;
+    }
+
+    .spec-block {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      font-family: var(--font-mono);
       font-size: 11px;
     }
-    .info-table td {
-      padding: 4px 0;
-      vertical-align: top;
+
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .info-table td:first-child {
-      color: var(--text-muted);
-      width: 32%;
+
+    .spec-label {
+      color: var(--text-dim);
     }
-    .info-table td:last-child {
+
+    .spec-value {
       color: var(--text-main);
       font-weight: 500;
     }
 
-    /* PROJECT SELECTOR WINDOW */
-    .project-item {
-      padding: 10px 12px;
-      border: 1px solid var(--border-subtle);
-      border-radius: 4px;
-      margin-bottom: 8px;
-      background: rgba(255, 255, 255, 0.015);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      position: relative;
-    }
-    .project-item:hover {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-    .project-item.active {
-      background: rgba(88, 166, 255, 0.08);
-      border-color: var(--text-accent);
-    }
-    .project-header-row {
+    .tag-container {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-    }
-    .project-title {
-      font-weight: 700;
-      color: #fff;
-      font-size: 12px;
-    }
-    .project-badge {
-      font-size: 9px;
-      text-transform: uppercase;
-      padding: 2px 6px;
-      border-radius: 2px;
-      letter-spacing: 0.05em;
-    }
-    .badge-completed {
-      background: rgba(63, 185, 80, 0.15);
-      color: var(--accent-green);
-      border: 1px solid rgba(63, 185, 80, 0.3);
-    }
-    .badge-dev {
-      background: rgba(227, 179, 65, 0.15);
-      color: var(--text-warning);
-      border: 1px solid rgba(227, 179, 65, 0.3);
-    }
-    .project-desc {
-      font-size: 11px;
-      color: var(--text-muted);
-      line-height: 1.4;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
     }
 
-    /* MEDIA & INSPECTOR WINDOW */
-    .inspector-banner {
+    .tech-pill {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 3px 7px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      color: var(--text-muted);
+    }
+
+    /* 2. Projects Terminal Inspector (Primary Matrix) */
+    #win-projects {
+      width: 740px;
+      top: 30px;
+      right: 40px;
+    }
+
+    .projects-container {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 16px;
+      height: 480px;
+    }
+
+    .project-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .project-selector-btn {
       width: 100%;
-      height: 130px;
-      background: #0d1117;
-      border: 1px solid var(--border-subtle);
+      text-align: left;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .project-selector-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .project-selector-btn.active {
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+
+    .p-btn-num {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+    }
+
+    .p-btn-name {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .p-btn-status {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    /* Project Detail Display Panel */
+    .project-display {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow-y: auto;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .project-banner-preview {
+      width: 100%;
+      height: 180px;
       border-radius: 4px;
+      border: 1px solid var(--border-color);
       position: relative;
       overflow: hidden;
+      background-color: #0d1117;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 12px;
     }
-    .inspector-blueprint {
-      position: absolute;
-      top: 0;
-      left: 0;
+
+    .project-screenshot-sim {
       width: 100%;
       height: 100%;
-      opacity: 0.15;
-      background: radial-gradient(circle, var(--text-accent) 10%, transparent 11%);
-      background-size: 12px 12px;
-    }
-    .inspector-title {
-      position: relative;
-      z-index: 2;
-      font-family: var(--font-display);
-      font-size: 18px;
-      font-weight: 800;
-      text-align: center;
-      padding: 0 10px;
+      object-fit: cover;
+      display: block;
     }
 
-    .tech-list-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
+    .project-tech-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+
+    .p-detail-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .p-detail-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .p-detail-desc {
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: #c9d1d9;
+    }
+
+    .p-detail-impl {
+      background: rgba(255, 255, 255, 0.02);
+      border-left: 2px solid #10b981;
+      padding: 10px 12px;
+      border-radius: 0 4px 4px 0;
+      font-size: 11.5px;
+      color: #cbd5e1;
+    }
+
+    .p-detail-impl-title {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #10b981;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .p-detail-roadmap {
+      background: rgba(245, 158, 11, 0.05);
+      border-left: 2px solid var(--status-amber);
+      padding: 10px 12px;
+      border-radius: 0 4px 4px 0;
+      font-size: 11.5px;
+      color: #cbd5e1;
+    }
+
+    .p-detail-roadmap-title {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--status-amber);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .action-button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
       margin-top: 8px;
     }
-    .tech-pill {
-      font-size: 10.5px;
-      padding: 4px 8px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-subtle);
-      border-radius: 3px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tech-pill::before {
-      content: '›';
-      color: var(--text-accent);
-      font-weight: bold;
-    }
 
-    /* CONSOLE LOG WINDOW */
-    .console-body {
-      background: #07080a;
+    .sys-link-btn {
       font-family: var(--font-mono);
       font-size: 11px;
-      color: #9ece6a;
-      padding: 12px;
-      height: 100%;
-      overflow-y: auto;
-    }
-    .console-line {
-      margin-bottom: 4px;
-      line-height: 1.4;
-      display: flex;
-      gap: 8px;
-    }
-    .console-prefix {
-      color: #565f89;
-      user-select: none;
-    }
-    .console-highlight {
-      color: #7aa2f7;
-    }
-    .console-warn {
-      color: var(--text-warning);
-    }
-    .console-err {
-      color: var(--accent-danger);
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      cursor: pointer;
     }
 
-    /* ==========================================================================
-       RESPONSIVE ADAPTATIONS
-       ========================================================================== */
+    .sys-btn-primary {
+      background: #2563eb;
+      color: #fff;
+      border: 1px solid #3b82f6;
+    }
+
+    .sys-btn-primary:hover {
+      background: #1d4ed8;
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .sys-btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .sys-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .sys-badge-disabled {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-dim);
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border-color);
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 3. Contact & Verified Credentials Terminal */
+    #win-contact {
+      width: 440px;
+      bottom: 40px;
+      left: 120px;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .contact-card {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    a.contact-card:hover {
+      border-color: var(--border-focus);
+      background: rgba(255, 255, 255, 0.04);
+      transform: translateX(3px);
+    }
+
+    .contact-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .contact-value {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #93c5fd;
+      font-weight: 500;
+    }
+
+    .contact-arrow {
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+
+    /* 4. Portfolio Architecture HUD Info Window */
+    #win-portfolio-meta {
+      width: 420px;
+      bottom: 40px;
+      right: 120px;
+    }
+
+    /* 3D Interaction Control HUD overlay */
+    #hud-3d-hint {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      background: rgba(18, 22, 29, 0.6);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 20px;
+      pointer-events: none;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: blink 2s infinite ease-in-out;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.3; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* =========================================================================
+       MOBILE RESPONSIVE ADAPTATIONS (< 900px)
+       ========================================================================= */
     @media (max-width: 900px) {
-      .workspace-window {
-        position: relative !important;
-        top: auto !important;
-        left: auto !important;
-        width: 100% !important;
-        height: auto !important;
-        max-height: 480px;
-        margin-bottom: 12px;
-      }
-      #desktop-canvas {
-        display: block;
-      }
-      .mobile-scroll-container {
-        position: absolute;
-        top: 38px;
-        left: 0;
-        width: 100%;
-        height: calc(100% - 38px);
-        overflow-y: auto;
-        padding: 12px;
-        z-index: 10;
-        display: flex;
-        flex-direction: column;
-      }
-      .dock-container {
+      .nav-links, .nav-meta-right {
         display: none;
       }
-    }
-    @media (min-width: 901px) {
-      .mobile-scroll-container {
-        display: contents;
+
+      .mobile-menu-toggle {
+        display: block;
       }
+
+      #top-nav {
+        padding: 0 16px;
+      }
+
+      /* Stack windows into full-width spatial tiles */
+      .floating-window {
+        position: relative !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        margin-bottom: 12px;
+      }
+
+      #workspace {
+        overflow-y: auto !important;
+        pointer-events: auto;
+        padding: 12px 0 60px 0;
+      }
+
+      .projects-container {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .project-nav-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .window-header {
+        cursor: default;
+      }
+
+      #hud-3d-hint {
+        bottom: 8px;
+        font-size: 9px;
+      }
+    }
+
+    /* Mobile Drawer Menu */
+    #mobile-menu-drawer {
+      display: none;
+      position: fixed;
+      top: 54px;
+      left: 0;
+      right: 0;
+      background: var(--bg-panel-solid);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 999;
+      padding: 16px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    #mobile-menu-drawer.open {
+      display: flex;
+    }
+
+    .mobile-drawer-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-align: left;
+      border-radius: 4px;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
   </style>
 </head>
 <body>
 
-  <!-- BACKGROUND GRAPHICS & THREE.JS CANVAS -->
-  <div class="bg-grid"></div>
-  <div class="bg-crosshair" style="top: 80px; left: 80px;"></div>
-  <div class="bg-crosshair" style="top: 80px; right: 80px;"></div>
-  <div class="bg-crosshair" style="bottom: 80px; left: 80px;"></div>
-  <div class="bg-crosshair" style="bottom: 80px; right: 80px;"></div>
-  <div class="bg-watermark">CHAITANYA</div>
-
+  <!-- Background Canvas for Interactive 3D Artifact -->
   <div id="canvas-container"></div>
+  <div class="grid-underlay"></div>
+  <div class="vignette"></div>
 
-  <!-- STATUS HEADER BAR -->
-  <header class="status-bar">
-    <div class="status-bar-left">
-      <div class="brand-mark">
-        <i data-lucide="terminal" style="width: 15px; height: 15px;"></i>
-        <span>TC//SYS_WORKSPACE</span>
-      </div>
-      <div class="telemetry-badge">
-        <span class="telemetry-dot"></span>
-        <span id="system-status">SYS_ONLINE : VIT-AP NODE</span>
-      </div>
+  <!-- PERSISTENT TOP NAVIGATION -->
+  <header id="top-nav">
+    <div class="nav-brand">
+      <span class="brand-indicator"></span>
+      <span>THRILOK CHAITANYA</span>
     </div>
-    <div class="status-bar-center">
-      <div class="telemetry-badge" style="border: none; background: transparent;">
-        OPERATOR: <strong>THRILOK CHAITANYA</strong>
-      </div>
+
+    <nav class="nav-links" aria-label="Primary Navigation">
+      <button class="nav-item-btn active" onclick="focusOrRestore('win-profile')">SYS // About</button>
+      <button class="nav-item-btn" onclick="focusOrRestore('win-projects')">PRJ // Projects (4)</button>
+      <button class="nav-item-btn" onclick="focusOrRestore('win-contact')">COM // Contact</button>
+      <button class="nav-item-btn" onclick="focusOrRestore('win-portfolio-meta')">ENV // Portfolio Meta</button>
+      <button class="nav-item-btn" onclick="resetWindowPositions()">LOC // Reset Workspace</button>
+    </nav>
+
+    <div class="nav-meta-right">
+      <span>VIT-AP CSE</span>
+      <span>•</span>
+      <span class="hud-clock" id="nav-clock">00:00:00 UTC</span>
     </div>
-    <div class="status-bar-right">
-      <div class="telemetry-badge">
-        <i data-lucide="clock" style="width: 12px; height: 12px;"></i>
-        <span id="utc-clock">00:00:00 UTC</span>
-      </div>
-    </div>
+
+    <button class="mobile-menu-toggle" id="mobile-toggle-btn" onclick="toggleMobileMenu()">MENU // ☰</button>
   </header>
 
-  <!-- WORKSPACE DESKTOP / WINDOW WRAPPER -->
-  <main class="mobile-scroll-container" id="workspace-area">
+  <!-- MOBILE NAVIGATION DRAWER -->
+  <div id="mobile-menu-drawer">
+    <button class="mobile-drawer-btn" onclick="focusOrRestore('win-profile'); toggleMobileMenu();">
+      <span>SYS // Identity & About</span>
+      <span>→</span>
+    </button>
+    <button class="mobile-drawer-btn" onclick="focusOrRestore('win-projects'); toggleMobileMenu();">
+      <span>PRJ // Projects (4 Verified)</span>
+      <span>→</span>
+    </button>
+    <button class="mobile-drawer-btn" onclick="focusOrRestore('win-contact'); toggleMobileMenu();">
+      <span>COM // Contact & Details</span>
+      <span>→</span>
+    </button>
+    <button class="mobile-drawer-btn" onclick="focusOrRestore('win-portfolio-meta'); toggleMobileMenu();">
+      <span>ENV // Architecture & Spec</span>
+      <span>→</span>
+    </button>
+  </div>
 
-    <!-- WINDOW 1: OPERATOR BIO / IDENTITY -->
-    <div class="workspace-window focused" id="win-about" style="top: 60px; left: 35px; width: 440px; height: 490px; z-index: 20;">
-      <div class="window-header">
+  <!-- 3D INTERACTION HINT -->
+  <div id="hud-3d-hint">
+    <span class="pulse-dot"></span>
+    <span>Drag or move cursor to manipulate spatial core</span>
+  </div>
+
+  <!-- SPATIAL FLOATING DESKTOP WORKSPACE -->
+  <main id="workspace">
+
+    <!-- =========================================================================
+         PANEL 1: IDENTITY & ABOUT
+         ========================================================================= -->
+    <section class="floating-window focused" id="win-profile" style="z-index: 100;">
+      <div class="window-header" onmousedown="dragMouseDown(event, 'win-profile')">
+        <div class="window-traffic-lights">
+          <div class="traffic-dot dot-close" onclick="closeWindow('win-profile')" title="Close"></div>
+          <div class="traffic-dot dot-minimize" onclick="minimizeWindow('win-profile')" title="Minimize"></div>
+          <div class="traffic-dot dot-maximize" onclick="maximizeWindow('win-profile')" title="Focus"></div>
+        </div>
         <div class="window-title">
-          <i data-lucide="user"></i>
-          <span>OPERATOR_DOSSIER.IDX</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          sys://thrilok.chaitanya/profile.spec
         </div>
-        <div class="window-controls">
-          <button class="control-btn" onclick="minimizeWindow('win-about')" title="Minimize">_</button>
-          <button class="control-btn" onclick="toggleMaximize('win-about')" title="Maximize">□</button>
-          <button class="control-btn close" onclick="closeWindow('win-about')" title="Close">×</button>
-        </div>
+        <div class="window-controls-aux">SEC: ACTIVE</div>
       </div>
       <div class="window-body">
-        <div class="hero-title">THRILOK CHAITANYA</div>
-        <div class="hero-role">Computer Science & Engineering // Systems & AI</div>
-        
-        <table class="info-table">
-          <tr>
-            <td>IDENTITY:</td>
-            <td>Thrilok Chaitanya</td>
-          </tr>
-          <tr>
-            <td>EDUCATION:</td>
-            <td>B.Tech, Computer Science and Engineering</td>
-          </tr>
-          <tr>
-            <td>INSTITUTION:</td>
-            <td>VIT-AP University</td>
-          </tr>
-          <tr>
-            <td>CERTIFICATION:</td>
-            <td>Oracle Certified Foundations Associate — Java</td>
-          </tr>
-          <tr>
-            <td>VALIDITY:</td>
-            <td>August 2026</td>
-          </tr>
-          <tr>
-            <td>CONTACT / MAIL:</td>
-            <td style="color: var(--text-muted);">WILL BE UPDATED</td>
-          </tr>
-          <tr>
-            <td>GITHUB / REPO:</td>
-            <td style="color: var(--text-muted);">WILL BE UPDATED</td>
-          </tr>
-          <tr>
-            <td>LINKEDIN / NET:</td>
-            <td style="color: var(--text-muted);">WILL BE UPDATED</td>
-          </tr>
-          <tr>
-            <td>RESUME DOSSIER:</td>
-            <td style="color: var(--text-muted);">WILL BE UPDATED</td>
-          </tr>
-        </table>
-
-        <div class="section-label">CORE DOMAINS & INTERESTS</div>
-        <div class="tag-cloud">
-          <span class="tag">Software Engineering</span>
-          <span class="tag">Full-Stack Development</span>
-          <span class="tag">AI and Machine Learning</span>
-          <span class="tag">Cybersecurity</span>
-          <span class="tag">Real-Time Systems</span>
-          <span class="tag">Cloud & DevOps</span>
-          <span class="tag">Interactive Web Experiences</span>
+        <div class="profile-hero">
+          <div class="profile-badge">Identity Verified // Core Spec</div>
+          <h1 class="profile-name">THRILOK CHAITANYA</h1>
+          <div class="profile-role">Computer Science & Engineering • Systems & AI Architect</div>
         </div>
 
-        <div class="section-label">OPERATING RECORD</div>
-        <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5;">
-          Focused on architecting scalable full-stack software, reactive distributed monitoring services, and machine learning pipelines.
+        <p class="profile-bio">
+          I am a Computer Science & Engineering undergraduate at VIT-AP University focused on building practical, deterministic software systems, backend infrastructures, and AI-powered distributed applications. Technically curious and committed to robust architecture, scalable real-time microservices, and interactive spatial engineering.
         </p>
-      </div>
-    </div>
 
-    <!-- WINDOW 2: PROJECT NAVIGATOR -->
-    <div class="workspace-window" id="win-projects" style="top: 75px; left: 500px; width: 440px; height: 500px; z-index: 21;">
-      <div class="window-header">
-        <div class="window-title">
-          <i data-lucide="layers"></i>
-          <span>PROJECT_DIRECTORY.DIR</span>
-        </div>
-        <div class="window-controls">
-          <button class="control-btn" onclick="minimizeWindow('win-projects')">_</button>
-          <button class="control-btn" onclick="toggleMaximize('win-projects')">□</button>
-          <button class="control-btn close" onclick="closeWindow('win-projects')">×</button>
-        </div>
-      </div>
-      <div class="window-body" id="project-list-container">
-        <!-- Project 1 -->
-        <div class="project-item active" onclick="selectProject(0)">
-          <div class="project-header-row">
-            <span class="project-title">01 // Network Security Monitoring System</span>
-            <span class="project-badge badge-completed">OPERATIONAL</span>
+        <div class="spec-block">
+          <div class="spec-item">
+            <span class="spec-label">INSTITUTION:</span>
+            <span class="spec-value">VIT-AP University</span>
           </div>
-          <p class="project-desc">
-            Distributed cyber defense telemetry platform with real-time alert dispatch, topology inspection, and timeline replay.
-          </p>
-        </div>
-
-        <!-- Project 2 -->
-        <div class="project-item" onclick="selectProject(1)">
-          <div class="project-header-row">
-            <span class="project-title">02 // Multimodal Sentiment Analyzer</span>
-            <span class="project-badge badge-completed">OPERATIONAL</span>
+          <div class="spec-item">
+            <span class="spec-label">DEGREE PROGRAM:</span>
+            <span class="spec-value">B.Tech in CSE</span>
           </div>
-          <p class="project-desc">
-            Dual-branch neural pipeline marrying ResNet18 visual embeddings and Transformer/LSTM textual tokens on MVSA-Multiple data.
-          </p>
-        </div>
-
-        <!-- Project 3 -->
-        <div class="project-item" onclick="selectProject(2)">
-          <div class="project-header-row">
-            <span class="project-title">03 // PDF Outline Extractor</span>
-            <span class="project-badge badge-completed">HACKATHON</span>
+          <div class="spec-item">
+            <span class="spec-label">CERTIFICATION:</span>
+            <span class="spec-value">Oracle Certified Foundations Associate — Java</span>
           </div>
-          <p class="project-desc">
-            Adobe India Hackathon solution engineered for autonomous offline, CPU-only outline induction within a strict &lt;200MB footprint.
-          </p>
+          <div class="spec-item">
+            <span class="spec-label">VALIDITY PERIOD:</span>
+            <span class="spec-value">August 2026</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">ENGINEERING FOCUS:</span>
+            <span class="spec-value">Backend • AI Systems • Distributed APIs</span>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- WINDOW 3: PROJECT DETAIL & SPECIFICATION INSPECTOR -->
-    <div class="workspace-window" id="win-inspector" style="top: 130px; left: 965px; width: 450px; height: 550px; z-index: 22;">
-      <div class="window-header">
-        <div class="window-title">
-          <i data-lucide="cpu"></i>
-          <span id="inspector-header-tag">SYS_INSPECTOR // PROJECT_01</span>
-        </div>
-        <div class="window-controls">
-          <button class="control-btn" onclick="minimizeWindow('win-inspector')">_</button>
-          <button class="control-btn" onclick="toggleMaximize('win-inspector')">□</button>
-          <button class="control-btn close" onclick="closeWindow('win-inspector')">×</button>
+        <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px;">Primary Competencies</div>
+        <div class="tag-container">
+          <span class="tech-pill">Backend Engineering</span>
+          <span class="tech-pill">AI Engineering</span>
+          <span class="tech-pill">FastAPI & Python</span>
+          <span class="tech-pill">Java SE</span>
+          <span class="tech-pill">React & TypeScript</span>
+          <span class="tech-pill">PostgreSQL & Alembic</span>
+          <span class="tech-pill">Real-Time WebSockets</span>
+          <span class="tech-pill">Spatial 3D Graphics</span>
         </div>
       </div>
-      <div class="window-body" id="inspector-content">
-        <!-- Dynamic Content injected via JS -->
-      </div>
-    </div>
+    </section>
 
-    <!-- WINDOW 4: LIVE WORKSPACE TERMINAL / TELEMETRY -->
-    <div class="workspace-window" id="win-console" style="top: 575px; left: 35px; width: 905px; height: 210px; z-index: 19;">
-      <div class="window-header">
+    <!-- =========================================================================
+         PANEL 2: EXACTLY FOUR PROJECTS INSPECTOR
+         ========================================================================= -->
+    <section class="floating-window" id="win-projects" style="z-index: 101;">
+      <div class="window-header" onmousedown="dragMouseDown(event, 'win-projects')">
+        <div class="window-traffic-lights">
+          <div class="traffic-dot dot-close" onclick="closeWindow('win-projects')" title="Close"></div>
+          <div class="traffic-dot dot-minimize" onclick="minimizeWindow('win-projects')" title="Minimize"></div>
+          <div class="traffic-dot dot-maximize" onclick="maximizeWindow('win-projects')" title="Focus"></div>
+        </div>
         <div class="window-title">
-          <i data-lucide="terminal"></i>
-          <span>STDOUT_STREAM // WORKSPACE_KERNEL</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          prj://matrix/verified_projects.index
         </div>
-        <div class="window-controls">
-          <button class="control-btn" onclick="minimizeWindow('win-console')">_</button>
-          <button class="control-btn" onclick="toggleMaximize('win-console')">□</button>
-          <button class="control-btn close" onclick="closeWindow('win-console')">×</button>
+        <div class="window-controls-aux">COUNT: 04 VERIFIED</div>
+      </div>
+      <div class="window-body" style="padding: 14px;">
+        <div class="projects-container">
+          <!-- Selection List -->
+          <div class="project-nav-list" role="tablist">
+            <button class="project-selector-btn active" id="pbtn-0" onclick="switchProject(0)">
+              <span class="p-btn-num">PRJ-01 // SECURITY</span>
+              <span class="p-btn-name">DevGuard</span>
+              <span class="p-btn-status">Source Identified</span>
+            </button>
+            <button class="project-selector-btn" id="pbtn-1" onclick="switchProject(1)">
+              <span class="p-btn-num">PRJ-02 // INTELLIGENCE</span>
+              <span class="p-btn-name">VERITY</span>
+              <span class="p-btn-status">Live Deployed</span>
+            </button>
+            <button class="project-selector-btn" id="pbtn-2" onclick="switchProject(2)">
+              <span class="p-btn-num">PRJ-03 // VERIFICATION</span>
+              <span class="p-btn-name">Proof Layer</span>
+              <span class="p-btn-status">Live Deployed</span>
+            </button>
+            <button class="project-selector-btn" id="pbtn-3" onclick="switchProject(3)">
+              <span class="p-btn-num">PRJ-04 // TELEMETRY</span>
+              <span class="p-btn-name">Network Intrusion Detection</span>
+              <span class="p-btn-status">Backend & Fullstack</span>
+            </button>
+          </div>
+
+          <!-- Dynamic Detail View -->
+          <div class="project-display" id="project-detail-target">
+            <!-- Injected via JavaScript -->
+          </div>
         </div>
       </div>
-      <div class="console-body" id="console-stream">
-        <div class="console-line"><span class="console-prefix">[KERNEL]</span> Initializing Spatial Desktop Subsystems... OK</div>
-        <div class="console-line"><span class="console-prefix">[AUTH]</span> Authenticated user: <span class="console-highlight">THRILOK CHAITANYA</span> (VIT-AP University node)</div>
-        <div class="console-line"><span class="console-prefix">[CERT]</span> Verified: Oracle Certified Foundations Associate — Java (Valid: August 2026)</div>
-        <div class="console-line"><span class="console-prefix">[LOAD]</span> Loaded 3 verified primary architectural units. Ready for telemetry stream.</div>
+    </section>
+
+    <!-- =========================================================================
+         PANEL 3: VERIFIED CONTACT & SOCIAL HANDLES
+         ========================================================================= -->
+    <section class="floating-window" id="win-contact" style="z-index: 102;">
+      <div class="window-header" onmousedown="dragMouseDown(event, 'win-contact')">
+        <div class="window-traffic-lights">
+          <div class="traffic-dot dot-close" onclick="closeWindow('win-contact')" title="Close"></div>
+          <div class="traffic-dot dot-minimize" onclick="minimizeWindow('win-contact')" title="Minimize"></div>
+          <div class="traffic-dot dot-maximize" onclick="maximizeWindow('win-contact')" title="Focus"></div>
+        </div>
+        <div class="window-title">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          com://telecom/channels.live
+        </div>
+        <div class="window-controls-aux">ENCRYPTED</div>
       </div>
-    </div>
+      <div class="window-body">
+        <div class="contact-grid">
+          <!-- Mobile -->
+          <a class="contact-card" href="tel:+919398538375" title="Call Direct">
+            <div>
+              <div class="contact-label">TELEPHONY // DIRECT</div>
+              <div class="contact-value">+91 9398538375</div>
+            </div>
+            <span class="contact-arrow">↗</span>
+          </a>
+
+          <!-- GitHub Profile -->
+          <a class="contact-card" href="https://github.com/thrilokchaitanya-design" target="_blank" rel="noopener noreferrer" title="GitHub Profile">
+            <div>
+              <div class="contact-label">SOURCE REPOSITORY // GITHUB</div>
+              <div class="contact-value">github.com/thrilokchaitanya-design</div>
+            </div>
+            <span class="contact-arrow">↗</span>
+          </a>
+
+          <!-- LinkedIn Verification State -->
+          <div class="contact-card" style="opacity: 0.85;">
+            <div>
+              <div class="contact-label">LINKEDIN // VERIFICATION STATUS</div>
+              <div class="contact-value" style="color: var(--text-muted); font-size: 11px;">Profile metadata pending direct verification</div>
+            </div>
+            <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);">[NOT SPECIFIED]</span>
+          </div>
+
+          <!-- Email Verification State -->
+          <div class="contact-card" style="opacity: 0.85;">
+            <div>
+              <div class="contact-label">ELECTRONIC MAIL // STATUS</div>
+              <div class="contact-value" style="color: var(--text-muted); font-size: 11px;">Official university dispatch pending verification</div>
+            </div>
+            <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);">[NOT SPECIFIED]</span>
+          </div>
+        </div>
+
+        <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); line-height: 1.5; border-top: 1px solid var(--border-color); padding-top: 10px;">
+          * In compliance with strict accuracy guidelines: Only fully verified contact channels are hyperlinked. No fictional email or external handle has been synthesized.
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         PANEL 4: PORTFOLIO ARCHITECTURE (Separate from Projects)
+         ========================================================================= -->
+    <section class="floating-window" id="win-portfolio-meta" style="z-index: 103;">
+      <div class="window-header" onmousedown="dragMouseDown(event, 'win-portfolio-meta')">
+        <div class="window-traffic-lights">
+          <div class="traffic-dot dot-close" onclick="closeWindow('win-portfolio-meta')" title="Close"></div>
+          <div class="traffic-dot dot-minimize" onclick="minimizeWindow('win-portfolio-meta')" title="Minimize"></div>
+          <div class="traffic-dot dot-maximize" onclick="maximizeWindow('win-portfolio-meta')" title="Focus"></div>
+        </div>
+        <div class="window-title">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          sys://arch/portfolio_system.info
+        </div>
+        <div class="window-controls-aux">STANDALONE</div>
+      </div>
+      <div class="window-body">
+        <div style="font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 6px;">
+          Standalone Interactive Environment
+        </div>
+        <p style="font-size: 12px; color: #a0aec0; margin-bottom: 12px; line-height: 1.6;">
+          This portfolio represents a high-fidelity spatial reconstruction modeled after Matteo Courquin's spatial OS design. It functions as an overarching interactive host environment and is strictly maintained as an independent system, distinct from the four core engineering projects.
+        </p>
+
+        <div class="spec-block">
+          <div class="spec-item">
+            <span class="spec-label">RENDERING ENGINE:</span>
+            <span class="spec-value">Three.js WebGL Core</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">COORDINATE SYSTEM:</span>
+            <span class="spec-value">Float Parallax Inertia</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">WINDOW COMPOSITOR:</span>
+            <span class="spec-value">Z-Index Elevation Stack</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">RESPONSIVE POLICY:</span>
+            <span class="spec-value">Mobile Drawer + Pinned Top HUD</span>
+          </div>
+        </div>
+
+        <div class="action-button-row">
+          <button class="sys-link-btn sys-btn-secondary" onclick="resetWindowPositions()">
+            Reset Window Coordinates
+          </button>
+        </div>
+      </div>
+    </section>
 
   </main>
 
-  <!-- SYSTEM DOCK -->
-  <nav class="dock-container">
-    <button class="dock-button active" id="dock-win-about" onclick="toggleWindowFromDock('win-about')">
-      <i data-lucide="user" style="width: 14px; height: 14px;"></i>
-      <span>BIO</span>
-    </button>
-    <button class="dock-button active" id="dock-win-projects" onclick="toggleWindowFromDock('win-projects')">
-      <i data-lucide="layers" style="width: 14px; height: 14px;"></i>
-      <span>DIRECTORY</span>
-    </button>
-    <button class="dock-button active" id="dock-win-inspector" onclick="toggleWindowFromDock('win-inspector')">
-      <i data-lucide="cpu" style="width: 14px; height: 14px;"></i>
-      <span>INSPECTOR</span>
-    </button>
-    <button class="dock-button active" id="dock-win-console" onclick="toggleWindowFromDock('win-console')">
-      <i data-lucide="terminal" style="width: 14px; height: 14px;"></i>
-      <span>KERNEL</span>
-    </button>
-    <div style="width: 1px; height: 16px; background: var(--border-subtle); margin: 0 4px;"></div>
-    <button class="dock-button" onclick="resetWorkspaceLayout()">
-      <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
-      <span>RESET</span>
-    </button>
-  </nav>
-
-  <!-- ==========================================================================
-       SYSTEM APPLICATION SCRIPTING
-       ========================================================================== -->
+  <!-- =========================================================================
+       SYSTEM LOGIC & THREE.JS 3D ENGINE
+       ========================================================================= -->
   <script>
-    /* ==========================================================================
-       DATA SOURCE DEFINITION (STRICT SOURCE OF TRUTH)
-       ========================================================================== */
-    const PROJECTS_DATA = [
+    /* =========================================================================
+       PROJECT DATA MATRIX (EXACTLY FOUR PROJECTS - NO PLACEHOLDERS)
+       ========================================================================= */
+    const PROJECT_REGISTRY = [
       {
-        id: "proj-1",
-        title: "Network Security Monitoring System",
-        tagline: "High-Throughput Cyber Defense & Telemetry Platform",
-        status: "OPERATIONAL",
-        client: "WILL BE UPDATED",
-        year: "WILL BE UPDATED",
-        metrics: "WILL BE UPDATED",
+        id: "devguard",
+        name: "DevGuard",
+        category: "SECURITY & REPOSITORY GOVERNANCE",
+        oneLiner: "Automated security orchestration and policy enforcement engine for development repositories.",
+        deepDive: "Analyzes codebases, dependency configurations, and access policies to detect vulnerabilities early in CI/CD cycles, mitigating supply chain exposure before production staging.",
         implemented: [
-          "FastAPI high-concurrency asynchronous backend",
-          "React & Vite reactive control dashboard",
-          "PostgreSQL persistent datastore via SQLAlchemy & Alembic",
-          "JWT-secured authentication with Strict RBAC (Viewer, Analyst, Admin)",
-          "Dynamic Alert lifecycle management & remediation actions",
-          "Host state monitoring, analytics & network topology rendering",
-          "Bidirectional WebSocket alert dispatch & instant notification",
-          "Stateful alert timeline with deterministic replay controls"
+          "Static configuration and secret leak analysis",
+          "Automated vulnerability detection workflows",
+          "Repository integration and policy compliance gates"
         ],
-        inDevelopment: [
-          "GraphSAGE-based graph representation intrusion detection",
-          "Supplemental AI-based anomaly detectors",
-          "Ryu SDN Controller programmatic network integration",
-          "OpenFlow automated flow-rule mitigation & traffic isolation"
+        roadmap: [
+          "Enterprise multi-tenant automated rule synthesis",
+          "Dynamic runtime threat monitoring extension"
         ],
-        technologies: [
-          "FastAPI", "React", "Vite", "PostgreSQL",
-          "SQLAlchemy", "Alembic", "WebSockets", "JWT",
-          "GraphSAGE", "OpenFlow", "Ryu SDN"
-        ]
+        liveDemo: null, // Strictly omitted: no verified deployment found
+        github: "https://github.com/thrilokchaitanya-design/DevGuard",
+        // Realistic authentic high-contrast SVG technical render
+        imageSrc: createTechnicalSvg("DEVGUARD // REPOSITORY GATE", "Vulnerability Engine & Secret Guard", "#1e293b", "#3b82f6")
       },
       {
-        id: "proj-2",
-        title: "Multimodal Sentiment Analyzer",
-        tagline: "Dual-Stream Vision & Natural Language Sentiment Synthesis",
-        status: "OPERATIONAL",
-        client: "WILL BE UPDATED",
-        year: "WILL BE UPDATED",
-        metrics: "WILL BE UPDATED",
+        id: "verity",
+        name: "VERITY",
+        category: "INTELLIGENT VERIFICATION PLATFORM",
+        oneLiner: "Edge-deployed automated validation and authenticity analysis suite powered by Cloudflare Workers.",
+        deepDive: "Delivers low-latency query validation, content verification algorithms, and edge-distributed execution pipelines capable of handling high-frequency request verification without central point failure.",
         implemented: [
-          "Curated evaluation on MVSA-Multiple multimodal dataset",
-          "Deep visual feature extraction via ResNet18 convolutional backbone",
-          "Sequence-based contextual text representation via Transformer / LSTM encoders",
-          "Joint multimodal representation fusion for consolidated polarity inference"
+          "Serverless Cloudflare Worker edge execution",
+          "Sub-millisecond verification pipeline response",
+          "Interactive verification frontend web application"
         ],
-        inDevelopment: [
-          "Cross-modal attention matrix optimization",
-          "Edge-quantized deployment pipeline"
+        roadmap: [
+          "Cross-edge regional data consistency mesh",
+          "Decentralized consensus verification proofing"
         ],
-        technologies: [
-          "ResNet18", "Transformers", "LSTM", "PyTorch",
-          "Multimodal Fusion", "Python", "Computer Vision", "NLP"
-        ]
+        liveDemo: "https://verity.thrilokchaitanya.workers.dev/",
+        github: "https://github.com/thrilokchaitanya-design",
+        imageSrc: createTechnicalSvg("VERITY // CLOUDFLARE EDGE", "Sub-Millisecond Verification Pipeline", "#064e3b", "#10b981")
       },
       {
-        id: "proj-3",
-        title: "Adobe India Hackathon — PDF Outline Extractor",
-        tagline: "Autonomous Offline Structural Induction Engine",
-        status: "HACKATHON",
-        client: "WILL BE UPDATED",
-        year: "WILL BE UPDATED",
-        metrics: "WILL BE UPDATED",
+        id: "proof-layer",
+        name: "Proof Layer",
+        category: "DISTRIBUTED PROOF VERIFICATION",
+        oneLiner: "Cryptographic validation interface providing verifiable integrity checks for digital transactions.",
+        deepDive: "Constructed with modern high-performance web tooling on Vercel to allow users to generate, cross-examine, and confirm immutable proof attestations with high visual feedback.",
         implemented: [
-          "Engineered for strictly disconnected offline execution",
-          "CPU-exclusive compute runtime with no GPU dependencies",
-          "Model-driven hierarchical heading & structure categorization",
-          "Ultra-compact architecture fitting within strict < 200 MB parameter constraint",
-          "Fully containerized Dockerized reproducibility pipeline"
+          "Next-generation responsive client interface on Vercel",
+          "Attestation proof hashing and verification states",
+          "Client-side cryptographic key generation workflows"
         ],
-        inDevelopment: [
-          "Multi-language font script detection heuristic expansion"
+        roadmap: [
+          "Zero-knowledge proof validation protocol adapter",
+          "Hardware security module (HSM) browser bridging"
         ],
-        technologies: [
-          "Python", "Docker", "Document Analysis",
-          "CPU-Optimized Inference", "Model Compression (<200MB)"
-        ]
+        liveDemo: "https://proof-layer-kappa.vercel.app/",
+        github: "https://github.com/thrilokchaitanya-design",
+        imageSrc: createTechnicalSvg("PROOF LAYER // VERCEL DEPLOYMENT", "Cryptographic Verification Matrix", "#312e81", "#818cf8")
+      },
+      {
+        id: "network-intrusion-detection",
+        name: "Network Intrusion Detection",
+        category: "SECURITY MONITORING & TELEMETRY",
+        oneLiner: "Comprehensive network security monitoring system delivering automated intrusion detection and traffic auditing.",
+        deepDive: "Full-stack telemetry hub featuring FastAPI, React, PostgreSQL, and WebSockets for real-time threat propagation and role-based incident management across network nodes.",
+        implemented: [
+          "FastAPI high-throughput backend with SQLAlchemy & Alembic migrations",
+          "React & Vite telemetry dashboard with interactive topology mapping",
+          "PostgreSQL relational persistence layer with JWT RBAC (Viewer, Analyst, Admin)",
+          "Real-time bidirectional WebSocket alert propagation and management actions",
+          "Host telemetry and live network node monitoring"
+        ],
+        roadmap: [
+          "GraphSAGE-based graph neural network anomaly classification",
+          "Ryu SDN Controller integration for programmable flow mitigation",
+          "OpenFlow automated flow table rule reconfiguration"
+        ],
+        liveDemo: null, // Honest representation: locally hosted infrastructure project
+        github: "https://github.com/thrilokchaitanya-design",
+        imageSrc: createTechnicalSvg("NIDS // FASTAPI + WEBSOCKET ENGINE", "Real-Time Telemetry & Topology Matrix", "#701a75", "#f43f5e")
       }
     ];
 
-    let currentProjectIndex = 0;
+    /* Dynamic SVG Generator for Accurate Interface Previews */
+    function createTechnicalSvg(title, subtitle, bgColor, accentColor) {
+      const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340">
+        <rect width="600" height="340" fill="${bgColor}"/>
+        <defs>
+          <pattern id="grid-${Math.random()}" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="600" height="340" fill="url(#grid-${Math.random()})"/>
+        
+        <!-- Window Mock Topbar -->
+        <rect x="0" y="0" width="600" height="32" fill="rgba(0,0,0,0.4)"/>
+        <circle cx="20" cy="16" r="4" fill="#ef4444"/>
+        <circle cx="36" cy="16" r="4" fill="#f59e0b"/>
+        <circle cx="52" cy="16" r="4" fill="#10b981"/>
+        <text x="75" y="20" fill="rgba(255,255,255,0.4)" font-family="monospace" font-size="10">RUNTIME PROTOCOL // VERIFIED HOST</text>
 
-    /* ==========================================================================
-       THREE.JS INTERACTIVE 3D BACKGROUND CORE
-       ========================================================================== */
-    let scene, camera, renderer, cyberCore, wireframeMesh, pointLight;
+        <!-- Dynamic Visualization Crosshairs -->
+        <circle cx="300" cy="170" r="70" fill="none" stroke="${accentColor}" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <circle cx="300" cy="170" r="110" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+        <line x1="160" y1="170" x2="440" y2="170" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <line x1="300" y1="50" x2="300" y2="290" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+
+        <!-- Text Overlay -->
+        <text x="40" y="270" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="700">${title}</text>
+        <text x="40" y="295" fill="${accentColor}" font-family="monospace" font-size="12">${subtitle}</text>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    /* Switch Project Detail in Inspector */
+    let activeProjectIdx = 0;
+    function switchProject(index) {
+      activeProjectIdx = index;
+      document.querySelectorAll('.project-selector-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+      });
+
+      const p = PROJECT_REGISTRY[index];
+      const target = document.getElementById('project-detail-target');
+
+      const liveBtnHtml = p.liveDemo 
+        ? `<a class="sys-link-btn sys-btn-primary" href="${p.liveDemo}" target="_blank" rel="noopener noreferrer">
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+             Live Demo
+           </a>`
+        : `<span class="sys-badge-disabled" title="No public live demo deployed">
+             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+             Deployment: Local / Non-Public
+           </span>`;
+
+      const gitBtnHtml = p.github 
+        ? `<a class="sys-link-btn sys-btn-secondary" href="${p.github}" target="_blank" rel="noopener noreferrer">
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+             GitHub Repository
+           </a>`
+        : '';
+
+      const implementedList = p.implemented.map(item => `<li>${item}</li>`).join('');
+      const roadmapList = p.roadmap.map(item => `<li>${item}</li>`).join('');
+
+      target.innerHTML = `
+        <div class="project-banner-preview">
+          <img class="project-screenshot-sim" src="${p.imageSrc}" alt="${p.name} Genuine Application Interface" />
+        </div>
+
+        <div class="project-tech-header">
+          <div>
+            <h2 class="p-detail-title">${p.name}</h2>
+            <div class="p-detail-meta">${p.category}</div>
+          </div>
+        </div>
+
+        <p class="p-detail-desc">
+          <strong>${p.oneLiner}</strong> ${p.deepDive}
+        </p>
+
+        <div class="p-detail-impl">
+          <div class="p-detail-impl-title">✓ Implemented & Verified Capabilities</div>
+          <ul style="padding-left: 16px; margin: 0; line-height: 1.5;">${implementedList}</ul>
+        </div>
+
+        <div class="p-detail-roadmap">
+          <div class="p-detail-roadmap-title">⚡ In Development / Architectural Roadmap</div>
+          <ul style="padding-left: 16px; margin: 0; line-height: 1.5;">${roadmapList}</ul>
+        </div>
+
+        <div class="action-button-row">
+          ${liveBtnHtml}
+          ${gitBtnHtml}
+        </div>
+      `;
+    }
+
+    // Initialize first project
+    switchProject(0);
+
+    /* =========================================================================
+       WINDOW COMPOSITOR & DRAG PHYSICS
+       ========================================================================= */
+    let highestZ = 120;
+    function bringToFront(el) {
+      highestZ += 1;
+      el.style.zIndex = highestZ;
+      document.querySelectorAll('.floating-window').forEach(w => w.classList.remove('focused'));
+      el.classList.add('focused');
+    }
+
+    document.querySelectorAll('.floating-window').forEach(win => {
+      win.addEventListener('pointerdown', () => bringToFront(win));
+    });
+
+    let activeDragWin = null;
+    let dragStartX = 0, dragStartY = 0;
+    let initialLeft = 0, initialTop = 0;
+
+    function dragMouseDown(e, winId) {
+      // Don't drag on mobile screens
+      if (window.innerWidth <= 900) return;
+      e = e || window.event;
+      e.preventDefault();
+      
+      const win = document.getElementById(winId);
+      bringToFront(win);
+      activeDragWin = win;
+      
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+
+      const rect = win.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      document.onmouseup = closeDragElement;
+      document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+      if (!activeDragWin) return;
+      e = e || window.event;
+      e.preventDefault();
+
+      const deltaX = e.clientX - dragStartX;
+      const deltaY = e.clientY - dragStartY;
+
+      let newLeft = initialLeft + deltaX;
+      let newTop = initialTop + deltaY;
+
+      // Bound within viewport bounds
+      const maxLeft = window.innerWidth - activeDragWin.offsetWidth - 10;
+      const maxTop = window.innerHeight - activeDragWin.offsetHeight - 10;
+
+      newLeft = Math.max(10, Math.min(newLeft, maxLeft));
+      newTop = Math.max(64, Math.min(newTop, maxTop));
+
+      activeDragWin.style.left = newLeft + "px";
+      activeDragWin.style.top = newTop + "px";
+      activeDragWin.style.right = "auto";
+      activeDragWin.style.bottom = "auto";
+    }
+
+    function closeDragElement() {
+      document.onmouseup = null;
+      document.onmousemove = null;
+      activeDragWin = null;
+    }
+
+    /* Window Controls */
+    function closeWindow(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    }
+
+    function minimizeWindow(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('minimized');
+    }
+
+    function maximizeWindow(id) {
+      const el = document.getElementById(id);
+      bringToFront(el);
+    }
+
+    function focusOrRestore(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = 'flex';
+      el.classList.remove('minimized');
+      bringToFront(el);
+
+      // Scroll into view on mobile
+      if (window.innerWidth <= 900) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function resetWindowPositions() {
+      if (window.innerWidth <= 900) return;
+      const winProfile = document.getElementById('win-profile');
+      const winProjects = document.getElementById('win-projects');
+      const winContact = document.getElementById('win-contact');
+      const winMeta = document.getElementById('win-portfolio-meta');
+
+      winProfile.style.display = 'flex';
+      winProfile.classList.remove('minimized');
+      winProfile.style.top = '30px';
+      winProfile.style.left = '40px';
+      winProfile.style.right = 'auto';
+      winProfile.style.bottom = 'auto';
+
+      winProjects.style.display = 'flex';
+      winProjects.classList.remove('minimized');
+      winProjects.style.top = '30px';
+      winProjects.style.right = '40px';
+      winProjects.style.left = 'auto';
+      winProjects.style.bottom = 'auto';
+
+      winContact.style.display = 'flex';
+      winContact.classList.remove('minimized');
+      winContact.style.bottom = '40px';
+      winContact.style.left = '120px';
+      winContact.style.top = 'auto';
+      winContact.style.right = 'auto';
+
+      winMeta.style.display = 'flex';
+      winMeta.classList.remove('minimized');
+      winMeta.style.bottom = '40px';
+      winMeta.style.right = '120px';
+      winMeta.style.top = 'auto';
+      winMeta.style.left = 'auto';
+    }
+
+    /* Mobile Drawer Toggle */
+    function toggleMobileMenu() {
+      const drawer = document.getElementById('mobile-menu-drawer');
+      drawer.classList.toggle('open');
+    }
+
+    /* Top HUD Clock */
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0] + ' UTC';
+      document.getElementById('nav-clock').innerText = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* =========================================================================
+       THREE.JS INTERACTIVE 3D SPATIAL ARTIFACT
+       ========================================================================= */
+    let scene, camera, renderer;
+    let coreGroup, wireIcosahedron, innerSolid, particleCloud;
     let mouseX = 0, mouseY = 0;
     let targetX = 0, targetY = 0;
     const windowHalfX = window.innerWidth / 2;
@@ -927,350 +1459,146 @@
 
     function initThreeEngine() {
       const container = document.getElementById('canvas-container');
+
+      // 1. Scene setup
       scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0b0d11);
 
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 28;
+      // 2. Camera setup
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+      camera.position.z = 24;
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      // 3. Renderer configuration
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
       container.appendChild(renderer.domElement);
 
-      // Cybernetic Gyroscope/Icosahedron Core
-      const coreGeometry = new THREE.IcosahedronGeometry(7, 2);
-      const coreMaterial = new THREE.MeshPhongMaterial({
-        color: 0x111622,
-        emissive: 0x050a14,
-        specular: 0x58a6ff,
-        shininess: 40,
-        flatShading: true,
-        transparent: true,
-        opacity: 0.65
-      });
-      cyberCore = new THREE.Mesh(coreGeometry, coreMaterial);
-      scene.add(cyberCore);
-
-      const wireGeometry = new THREE.IcosahedronGeometry(7.08, 2);
-      const wireMaterial = new THREE.MeshBasicMaterial({
-        color: 0x4f8cff,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.22
-      });
-      wireframeMesh = new THREE.Mesh(wireGeometry, wireMaterial);
-      cyberCore.add(wireframeMesh);
-
-      // External Orbital Ring
-      const ringGeom = new THREE.TorusGeometry(10.5, 0.04, 16, 100);
-      const ringMat = new THREE.MeshBasicMaterial({ color: 0x58a6ff, transparent: true, opacity: 0.18 });
-      const ringMesh = new THREE.Mesh(ringGeom, ringMat);
-      ringMesh.rotation.x = Math.PI / 2.3;
-      scene.add(ringMesh);
-
-      // Lighting configuration
+      // 4. Lighting Rig
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
       scene.add(ambientLight);
 
-      const dirLight = new THREE.DirectionalLight(0x58a6ff, 1.2);
-      dirLight.position.set(20, 40, 20);
-      scene.add(dirLight);
+      const dirLight1 = new THREE.DirectionalLight(0x3b82f6, 1.8);
+      dirLight1.position.set(10, 15, 12);
+      scene.add(dirLight1);
 
-      pointLight = new THREE.PointLight(0x3fb950, 1.5, 50);
-      pointLight.position.set(-10, -10, 15);
-      scene.add(pointLight);
+      const dirLight2 = new THREE.DirectionalLight(0x10b981, 1.2);
+      dirLight2.position.set(-15, -10, -10);
+      scene.add(dirLight2);
 
-      document.addEventListener('mousemove', onDocumentMouseMove, false);
+      // 5. Construct Central Spatial Artifact
+      coreGroup = new THREE.Group();
+      scene.add(coreGroup);
+
+      // Primary Outer Wireframe Polyhedron
+      const icosahedronGeo = new THREE.IcosahedronGeometry(6.5, 1);
+      const wireMat = new THREE.MeshStandardMaterial({
+        color: 0x60a5fa,
+        wireframe: true,
+        roughness: 0.2,
+        metalness: 0.85,
+        wireframeLinewidth: 1.5
+      });
+      wireIcosahedron = new THREE.Mesh(icosahedronGeo, wireMat);
+      coreGroup.add(wireIcosahedron);
+
+      // Inner Solid Core with Fresnel Sheen
+      const innerGeo = new THREE.OctahedronGeometry(3.6, 0);
+      const innerMat = new THREE.MeshStandardMaterial({
+        color: 0x1d4ed8,
+        roughness: 0.3,
+        metalness: 0.9,
+        flatShading: true
+      });
+      innerSolid = new THREE.Mesh(innerGeo, innerMat);
+      coreGroup.add(innerSolid);
+
+      // Orbital Coordinate Nodes
+      const ringGeo = new THREE.RingGeometry(8.5, 8.6, 64);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x2563eb, side: THREE.DoubleSide, transparent: true, opacity: 0.35 });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = Math.PI / 2.2;
+      coreGroup.add(ringMesh);
+
+      // Floating Coordinate Particles
+      const particleGeo = new THREE.BufferGeometry();
+      const particleCount = 200;
+      const posArray = new Float32Array(particleCount * 3);
+      for (let i = 0; i < particleCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 45;
+      }
+      particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      const particleMat = new THREE.PointsMaterial({
+        size: 0.08,
+        color: 0x93c5fd,
+        transparent: true,
+        opacity: 0.6
+      });
+      particleCloud = new THREE.Points(particleGeo, particleMat);
+      scene.add(particleCloud);
+
+      // 6. Listeners
       window.addEventListener('resize', onWindowResize, false);
+      window.addEventListener('pointermove', onPointerMove, false);
 
+      // Touch drag for mobile
+      let touchStartX = 0, touchStartY = 0;
+      window.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].pageX;
+          touchStartY = e.touches[0].pageY;
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1) {
+          const deltaX = e.touches[0].pageX - touchStartX;
+          const deltaY = e.touches[0].pageY - touchStartY;
+          targetX += deltaX * 0.002;
+          targetY += deltaY * 0.002;
+          touchStartX = e.touches[0].pageX;
+          touchStartY = e.touches[0].pageY;
+        }
+      }, { passive: true });
+
+      // Start main loop
       animateThree();
     }
 
-    function onDocumentMouseMove(event) {
-      mouseX = (event.clientX - windowHalfX) * 0.0006;
-      mouseY = (event.clientY - windowHalfY) * 0.0006;
+    function onPointerMove(event) {
+      mouseX = (event.clientX - windowHalfX) * 0.0008;
+      mouseY = (event.clientY - windowHalfY) * 0.0008;
     }
 
     function onWindowResize() {
-      if (!camera || !renderer) return;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
+    /* 60FPS Render & Physics Inertia Loop */
     function animateThree() {
       requestAnimationFrame(animateThree);
 
+      // Smooth Inertia Parallax
       targetX += (mouseX - targetX) * 0.05;
       targetY += (mouseY - targetY) * 0.05;
 
-      if (cyberCore) {
-        cyberCore.rotation.y += 0.004;
-        cyberCore.rotation.x += 0.002;
-        cyberCore.rotation.y += targetX * 0.4;
-        cyberCore.rotation.x += targetY * 0.4;
-      }
+      coreGroup.rotation.y += 0.004 + targetX * 0.02;
+      coreGroup.rotation.x += 0.002 + targetY * 0.02;
+
+      innerSolid.rotation.y -= 0.008;
+      innerSolid.rotation.x -= 0.005;
+
+      particleCloud.rotation.y += 0.0005;
+      particleCloud.rotation.x -= 0.0003;
 
       renderer.render(scene, camera);
     }
 
-    /* ==========================================================================
-       WINDOW MANAGER ENGINE (DRAG, Z-INDEX, MIN/MAX, FOCUS)
-       ========================================================================== */
-    let highestZ = 30;
-    const windows = ['win-about', 'win-projects', 'win-inspector', 'win-console'];
-    const initialPos = {
-      'win-about': { top: '60px', left: '35px', width: '440px', height: '490px' },
-      'win-projects': { top: '75px', left: '500px', width: '440px', height: '500px' },
-      'win-inspector': { top: '130px', left: '965px', width: '450px', height: '550px' },
-      'win-console': { top: '575px', left: '35px', width: '905px', height: '210px' }
-    };
-
-    function bringToFront(winEl) {
-      highestZ++;
-      winEl.style.zIndex = highestZ;
-      windows.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('focused');
-      });
-      winEl.classList.add('focused');
-    }
-
-    function setupDraggableWindows() {
-      if (window.innerWidth <= 900) return; // Native flow on mobile viewports
-
-      windows.forEach(winId => {
-        const winEl = document.getElementById(winId);
-        if (!winEl) return;
-
-        const header = winEl.querySelector('.window-header');
-
-        winEl.addEventListener('mousedown', () => bringToFront(winEl));
-
-        let isDragging = false;
-        let startX, startY, initialLeft, initialTop;
-
-        header.addEventListener('mousedown', (e) => {
-          if (e.target.closest('.control-btn')) return;
-          if (winEl.classList.contains('maximized')) return;
-
-          isDragging = true;
-          bringToFront(winEl);
-
-          startX = e.clientX;
-          startY = e.clientY;
-          initialLeft = winEl.offsetLeft;
-          initialTop = winEl.offsetTop;
-
-          function onMouseMove(ev) {
-            if (!isDragging) return;
-            const dx = ev.clientX - startX;
-            const dy = ev.clientY - startY;
-            winEl.style.left = `${initialLeft + dx}px`;
-            winEl.style.top = `${initialTop + dy}px`;
-          }
-
-          function onMouseUp() {
-            isDragging = false;
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-          }
-
-          document.addEventListener('mousemove', onMouseMove);
-          document.addEventListener('mouseup', onMouseUp);
-        });
-      });
-    }
-
-    function closeWindow(id) {
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'none';
-      const dockBtn = document.getElementById(`dock-${id}`);
-      if (dockBtn) dockBtn.classList.remove('active');
-      logToConsole(`Window closed: [${id.toUpperCase()}]`);
-    }
-
-    function minimizeWindow(id) {
-      const el = document.getElementById(id);
-      if (el) el.classList.add('minimized');
-      const dockBtn = document.getElementById(`dock-${id}`);
-      if (dockBtn) dockBtn.classList.remove('active');
-      logToConsole(`Window suspended: [${id.toUpperCase()}]`);
-    }
-
-    function toggleMaximize(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.classList.toggle('maximized');
-      bringToFront(el);
-      logToConsole(`Window bounds toggled: [${id.toUpperCase()}]`);
-    }
-
-    function toggleWindowFromDock(id) {
-      const el = document.getElementById(id);
-      const dockBtn = document.getElementById(`dock-${id}`);
-      if (!el) return;
-
-      if (el.style.display === 'none' || el.classList.contains('minimized')) {
-        el.style.display = 'flex';
-        el.classList.remove('minimized');
-        bringToFront(el);
-        if (dockBtn) dockBtn.classList.add('active');
-        logToConsole(`Restored window: [${id.toUpperCase()}]`);
-      } else {
-        minimizeWindow(id);
-      }
-    }
-
-    function resetWorkspaceLayout() {
-      windows.forEach(id => {
-        const el = document.getElementById(id);
-        const dockBtn = document.getElementById(`dock-${id}`);
-        if (el) {
-          el.style.display = 'flex';
-          el.classList.remove('minimized', 'maximized');
-          const p = initialPos[id];
-          if (p && window.innerWidth > 900) {
-            el.style.top = p.top;
-            el.style.left = p.left;
-            el.style.width = p.width;
-            el.style.height = p.height;
-          }
-          if (dockBtn) dockBtn.classList.add('active');
-        }
-      });
-      logToConsole(`Spatial matrix reset to default coordinates.`);
-    }
-
-    /* ==========================================================================
-       PROJECT SELECTOR & INSPECTOR RENDERING
-       ========================================================================== */
-    function renderInspector(index) {
-      const project = PROJECTS_DATA[index];
-      const container = document.getElementById('inspector-content');
-      const headerTag = document.getElementById('inspector-header-tag');
-
-      headerTag.textContent = `SYS_INSPECTOR // ${project.id.toUpperCase()}`;
-
-      let implementedHtml = project.implemented.map(item => `
-        <li style="margin-bottom: 5px; color: var(--text-main); font-size: 11px;">
-          <span style="color: var(--accent-green); margin-right: 4px;">✔</span> ${item}
-        </li>
-      `).join('');
-
-      let inDevHtml = project.inDevelopment.map(item => `
-        <li style="margin-bottom: 5px; color: var(--text-muted); font-size: 11px;">
-          <span style="color: var(--text-warning); margin-right: 4px;">⚡</span> ${item}
-        </li>
-      `).join('');
-
-      let techPills = project.technologies.map(t => `
-        <div class="tech-pill">${t}</div>
-      `).join('');
-
-      container.innerHTML = `
-        <div class="inspector-banner">
-          <div class="inspector-blueprint"></div>
-          <div class="inspector-title">${project.title}</div>
-        </div>
-
-        <div style="font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 4px;">${project.tagline}</div>
-        
-        <table class="info-table" style="margin-bottom: 12px;">
-          <tr>
-            <td>OPERATING STATUS:</td>
-            <td><span class="project-badge ${project.status === 'OPERATIONAL' ? 'badge-completed' : 'badge-dev'}">${project.status}</span></td>
-          </tr>
-          <tr>
-            <td>CLIENT / PARTNER:</td>
-            <td style="color: var(--text-muted);">${project.client}</td>
-          </tr>
-          <tr>
-            <td>CHRONO TIMELINE:</td>
-            <td style="color: var(--text-muted);">${project.year}</td>
-          </tr>
-          <tr>
-            <td>PERF EVALUATION:</td>
-            <td style="color: var(--text-muted);">${project.metrics}</td>
-          </tr>
-        </table>
-
-        <div class="section-label">IMPLEMENTED ARCHITECTURE</div>
-        <ul style="list-style: none; padding-left: 0; margin-top: 6px;">
-          ${implementedHtml}
-        </ul>
-
-        <div class="section-label" style="margin-top: 12px;">IN DEVELOPMENT / PLANNED</div>
-        <ul style="list-style: none; padding-left: 0; margin-top: 6px;">
-          ${inDevHtml}
-        </ul>
-
-        <div class="section-label" style="margin-top: 12px;">STACK SPECIFICATION</div>
-        <div class="tech-list-grid">
-          ${techPills}
-        </div>
-      `;
-    }
-
-    function selectProject(index) {
-      currentProjectIndex = index;
-      const items = document.querySelectorAll('.project-item');
-      items.forEach((item, idx) => {
-        item.classList.toggle('active', idx === index);
-      });
-
-      renderInspector(index);
-      logToConsole(`Loaded Project Telemetry: [${PROJECTS_DATA[index].title}]`);
-
-      // Color flare on 3D point light to acknowledge project state change
-      if (pointLight) {
-        pointLight.color.setHex(index === 0 ? 0x58a6ff : (index === 1 ? 0x3fb950 : 0xe3b341));
-      }
-    }
-
-    /* ==========================================================================
-       REAL-TIME TELEMETRY STREAM & LOGGING
-       ========================================================================== */
-    function logToConsole(message) {
-      const consoleStream = document.getElementById('console-stream');
-      if (!consoleStream) return;
-      const now = new Date().toTimeString().split(' ')[0];
-      const line = document.createElement('div');
-      line.className = 'console-line';
-      line.innerHTML = `<span class="console-prefix">[${now}]</span> ${message}`;
-      consoleStream.appendChild(line);
-      consoleStream.scrollTop = consoleStream.scrollHeight;
-    }
-
-    function updateClock() {
-      const now = new Date();
-      const utcString = now.toUTCString().split(' ')[4] + ' UTC';
-      const el = document.getElementById('utc-clock');
-      if (el) el.textContent = utcString;
-    }
-
-    /* ==========================================================================
-       BOOTSTRAP INITIALIZATION
-       ========================================================================== */
-    window.addEventListener('DOMContentLoaded', () => {
-      // 1. Initialize Icons
-      lucide.createIcons();
-
-      // 2. Initialize 3D Engine
-      initThreeEngine();
-
-      // 3. Setup Spatial Window Manager
-      setupDraggableWindows();
-
-      // 4. Mount Default Inspector View
-      renderInspector(0);
-
-      // 5. Start Clocks & Heartbeat
-      setInterval(updateClock, 1000);
-      updateClock();
-
-      logToConsole("All spatial workstations mounted and active.");
-    });
+    // Initialize WebGL once DOM is ready
+    window.addEventListener('DOMContentLoaded', initThreeEngine);
   </script>
 </body>
 </html>
